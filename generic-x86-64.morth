@@ -1,0 +1,187 @@
+( 
+    channel 0 -- code 
+    channel 1 -- read only data 
+    channel 2 -- bss
+)
+
+:$ :.text [ :e  ]
+:$ :.rodata [ :e1  ]
+:$ :.data [ :e2  ]
+:$ :.bss  [ :e3 ]
+
+:i "generic-core.morth"
+
+:$ drop [ :.text "pop r8" ]
+:$ dup [ :.text "mov r8, [rsp]" :.text "push r8" ]
+
+:$ ->rax  [ :.text "pop rax" ]
+:$ ->rbx  [ :.text "pop rbx" ]
+:$ ->rcx  [ :.text "pop rcx" ]
+:$ ->rdx  [ :.text "pop rdx" ]
+:$ ->rsi  [ :.text "pop rsi" ]
+:$ ->rdi  [ :.text "pop rdi" ]
+:$ ->r8   [ :.text "pop r8" ]
+:$ ->r9   [ :.text "pop r9" ]
+:$ <-rax  [ :.text "push rax" ]
+:$ <-rdx  [ :.text "push rdx" ]
+:$ <-r8   [ :.text "push r8" ]
+:$ :asm-test-rbx  [ :e "test rbx, rbx"]
+
+:$ :int-literal [ 
+    :.text `mov r8, {LIT}`
+    :.text `push r8`
+]
+
+:$ :code-block-ref [
+    :.text `mov r8, {LIT}`
+    :.text `push r8`
+]
+
+:$ :variable-ref [
+    :.text `mov r8, {LIT}`
+    :.text `push r8`
+]
+
+
+
+:$ :int-literal-u8 [ 
+    :.text `push qword {LIT}`
+]
+
+:$ :string-literal [
+    :.text `push {CL+}`
+    :.rodata `{CL!}: db \`{LIT}\``
+
+]
+
+:$ exit [
+    ->rdi
+    60 ->rax
+    syscall
+]
+
+:$ :func-call [
+    :.text `mov r8, {CL+}`
+    :.text `call {LIT}`
+    :.text `{CL!}:`
+]
+
+
+:$ iff [    
+    ->rax ->rbx :asm-test-rbx   
+    :.text `jz {CL+}`
+    :.text `call rax`
+    :.text `{CL!}:`
+]
+:$ ifz [    
+    ->rax ->rbx :asm-test-rbx       
+    :.text `jnz {CL+}`
+    :.text `call rax`
+    :.text `{CL!}:`
+]
+
+:$ /mod [
+    ->r8 ->rax 
+    :.text "xor rdx, rdx"
+    :.text "div r8"
+    <-rdx <-rax
+]
+
+:$ + [ 
+    ->r8
+    :.text "add qword [rsp], r8"
+]
+:$ - [ 
+    ->r8
+    :.text "sub qword [rsp], r8"
+]
+
+:$ 1- [  :.text "sub qword [rsp], 1" ]
+:$ 1+ [  :.text "add qword [rsp], 1" ]
+:$ 2+ [  :.text "add qword [rsp], 2" ]
+
+:$ syscall [ 
+    ( rax: syscall id )
+    ( rdi: arg1 as in C)
+    ( rsi: arg2 as in C)
+    ( rdx: arg3 as in C)
+    :.text "syscall" 
+]
+
+:$ nip [ ->r8 ->r9 <-r8 ]
+:$ over [
+    :.text "mov r8, [rsp+8]"
+    <-r8
+]
+
+:$ c! (val addr --) [ ->r9 ->r8
+    :.text "mov [r9], r8b"
+]
+
+:$ c@ [ ->r8   
+    :.text "mov r8b, [r8]"
+    :.text "and r8, 255"
+    <-r8
+]
+
+:$ = [ ->r8 ->r9
+    :.text "xor rdx, rdx"
+    :.text "cmp r8, r9"
+    :.text "sete dl"
+    <-rdx
+]
+
+:$ :- [ :.text "call do_pop" ]
+:$ :+ [ ->r8 
+    :.text "mov r8, [rsp + r8 * 8]"
+    <-r8
+]
+:$ :v [ ->r8 ->r9
+    :.text "mov rax, [rsp + r8 * 8]"
+    :.text "mov rbx, [rsp + r9 * 8]"
+    :.text "mov [rsp + r8 * 8], rbx"
+    :.text "mov [rsp + r9 * 8], rax"
+ ]
+
+:$ :global-variable-decl-char [
+    :.bss `{NAME}: resb {LIT}`
+]
+:$ :global-variable-decl-cell [
+    :.bss `{NAME}: resq {LIT}`
+]
+:$ :code-block-prologue [
+    :.text `{NAME}:`
+    :.text `mov r8, [_callstack_top_ptr]`
+    :.text `add r8, 8`
+    :.text `pop r9`
+    :.text `mov [r8], r9`
+    :.text `mov [_callstack_top_ptr], r8`
+    :.text `{NAME}_start:`
+   
+]
+:$ :code-block-epilogue [
+    :.text `{NAME}_end:`
+    :.text `mov r8, [_callstack_top_ptr]`
+    :.text `sub qword [_callstack_top_ptr], 8`
+    :.text `jmp [r8]`
+]
+
+:$ leave [
+    :.text `sub qword [_callstack_top_ptr], 8*({BLOCK_DEPTH}+1)`
+    :.text `mov r8, [_callstack_top_ptr]`
+    :.text `jmp [r8+8]`
+]
+
+:$ repnz [
+    ->rax
+    :.text "test rax, rax"
+    :.text `jnz {NAME}_start`
+]
+
+
+
+:$ hlt [ :.text "hlt" ]
+
+
+( vim: set filetype=forth : )
+

@@ -1,0 +1,66 @@
+:$ 1- [ 1 - ]
+:$ 1+ [ 1 + ]
+:$ drop (AB-A) [ 0 :- ]
+:$ nip (AB-B) [ 1 :- ]
+
+:$ dup (A-AA) [ 0 :+ ]
+:$ over (AB-ABA) [ 1 :+ ]
+
+:$ tuck (AB-BAB) [ 0 :+ 2 :v ]
+:$ swap (AB-BA) [ 0 1 :v ]
+
+:$ puts [ type cr ]
+
+:$ pick (x0..xu u -- x0..xu xu) [ :+ ]
+
+:$ rot (..abc-bca) [
+    0 2 :v (cba)   
+    1 2 :v (bca)
+]
+
+:$ -rot (abc -- cab) [
+    0 2 :v (c b a)
+    0 1 :v (c a b)
+]
+
+:$ ?dup (w -- 0 | w w) [
+    dup [ dup ] iff
+]
+
+:$ roll (x0 x1 .. xn n -- x1 x2 .. xn x0) [
+ ( e.g. consider :swap 1 roll )
+ 1 + 0 :+ ( x0 x1 .. xn n+1 n+1: a b 2 2)
+ :+       ( x0 x1 .. xn n+1 n+1: a b 2 a)
+ 0 1 :v   ( x0 x1 .. xn n+1 n+1: a b a 2)
+ :-       ( b a )
+]
+:$ 2drop [ drop drop ]
+:$ 2nip [ 2 :- 2 :- ] 
+:$ 2dup [ over over ]
+:$ 2over [ 3 :+ 3 :+ ]
+
+:$ 2tuck (..abcd – ..cdabcd ) [
+    2dup (abcdcd)
+    3 5 :v (cbadcd)
+    2 4 :v (cdabcd)
+]
+
+:$ 2swap (abcd -- cdab) [
+    1 3 :v (cbad)
+    0 2 :v (cdab)
+]
+
+:$ 2rot (..abcdef – cdefab) [
+    0 4 :v (..afcdeB)
+    1 5 :v (..efcdAB)
+    2 4 :v (..eDcFAB)
+    5 3 :v (..CDEFAB)
+]
+
+:$ mod (a b -- a%b) [
+    /mod drop
+]
+
+:$ cr [ "\n" 1 type ]
+
+( vim: set filetype=forth : )

@@ -1,0 +1,33 @@
+:i "generic-x86-64.morth"
+
+
+:$ type ( ptr addr -- ) [
+    1 ( stdout )
+    1 ( write ) ->rax ( syscall )
+    ->rdi ( stdout )
+    ->rdx ( length )
+    ->rsi ( buffer )
+    syscall
+]
+
+:$ :prologue [
+    :.text "BITS 64"
+    :.text "SECTION .text"
+    :.text "GLOBAL _start"
+    :.text "_start:"
+    :.text "mov qword [_callstack], _start_hlt"
+    :.text `call {LIT}`
+    :.text "_start_hlt:"
+    :.text "hlt"
+    
+    :.data ""
+    :.data "SECTION .data"
+    :.data "_callstack_top_ptr: dq _callstack"
+
+    :.bss ""
+    :.bss "SECTION .bss"
+    :.bss "_callstack: resq 8192"
+]
+
+
+
