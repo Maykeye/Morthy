@@ -182,6 +182,24 @@
 
 :$ hlt [ :.text "hlt" ]
 
+:$ :do_pop [
+    :e "do_pop:"
+    :e "    pop r8"
+    :e "    pop rcx"
+    :e "    lea rdi, [rsp + rcx * 8]"
+    :e "    lea rsi, [rdi - 8]"
+    :e "    cmp rcx, 0"
+    :e "    jle .exit_copy"
+    :e ".loop:"
+    :e "    mov rax, [rsi]"
+    :e "    mov [rdi], rax"
+    :e "    sub rsi, 8"
+    :e "    sub rdi, 8"
+    :e "    loop .loop"
+    :e ".exit_copy:"
+    :e "    pop rax"
+    :e "    jmp r8"
+]
 
 ( vim: set filetype=forth : )
 

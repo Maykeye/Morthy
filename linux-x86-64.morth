@@ -19,6 +19,7 @@
     :.text `call {LIT}`
     :.text "_start_hlt:"
     :.text "hlt"
+    :do_pop
     
     :.data ""
     :.data "SECTION .data"
