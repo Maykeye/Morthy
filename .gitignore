@@ -1,0 +1,6 @@
+*.asm
+*.o
+fizzbuzz
+.vscode
+x
+2
