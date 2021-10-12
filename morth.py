@@ -191,8 +191,9 @@ class Context:
                 continue
             self.goto_next_char() # skip initial \\
             found = False
+            attempt = ""
             for x in range(3):
-                attempt = self.peek()             
+                attempt += self.peek()
                 self.goto_next_char()
                 if attempt in Context.STR_REPLACEMENT:
                     string += Context.STR_REPLACEMENT[attempt]
@@ -466,11 +467,10 @@ def init_context():
     ]:
         Context.STR_REPLACEMENT[src]=dst
 
-
     for x in "xX":
         for h0 in "0123456789ABCDEFabcdef":
             for h1 in "0123456789ABCDEFabcdef":
-                Context.STR_REPLACEMENT[x + h0 + h1] = int(h0+h1, 16)
+                Context.STR_REPLACEMENT[x + h0 + h1] = f"\\x{int(h0+h1,16):02x}"
 
     
 
