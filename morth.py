@@ -1,7 +1,6 @@
 #!/usr/bin/python3
-
-from os import error
-
+import sys
+VERBOSE=0
 class Definition:
     def __init__(self, name, value, location):
         self.name = name 
@@ -44,7 +43,8 @@ class Context:
         self.main_function=None
 
     def parse_file(self, filename):
-        print(f"Parsing {filename}")
+        if VERBOSE:
+            print(f"Parsing {filename}")
         self.pos = Location(filename, 0, 1, 1)        
         self.text = open(filename).read()
         self.parse()
@@ -184,7 +184,6 @@ class Context:
                 break
             if self.peek() == "\n":
                 self.error("unterminated string literal")
-
             if self.peek() != '\\':
                 string += self.peek()
                 self.goto_next_char()
@@ -475,12 +474,14 @@ def init_context():
     
 
 
-def main():
+def main(extension=".morth"):    
     init_context()
-    ctx = Context()    
-    ctx.parse_file("fizzbuzz.morth") 
+    ctx = Context()
+    source = "fizzbuzz.morth" if len(sys.argv) <= 1 else sys.argv[1]
+    assert source.endswith(extension)
+    ctx.parse_file(source) 
     ctx.compile("main")
-    ctx.dump("fizzbuzz.asm")   
+    ctx.dump(f"out/{source[:-len(extension)]}.asm")
 
 if __name__ == "__main__":
     main()
