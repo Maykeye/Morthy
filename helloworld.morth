@@ -1,0 +1,9 @@
+:i "std.morth"
+
+: main [
+    "hello\x20world\n" $bstrlen type 
+    0 exit
+]
+
+
+( vim: set filetype=forth : )
