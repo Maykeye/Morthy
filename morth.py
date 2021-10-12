@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 import sys
 import os
-from typing import SupportsRound
+import subprocess
 VERBOSE=0
 class Definition:
     def __init__(self, name, value, location):
@@ -474,8 +474,7 @@ def init_context():
                 Context.STR_REPLACEMENT[x + h0 + h1] = f"\\x{int(h0+h1,16):02x}"
 
     
-def main(input_filename="fizzbuzz.morth", output="nasm"):
-    
+def run(input_filename="fizzbuzz.morth", output="nasm"):
     assert output in ["nasm", "nasm-ld", "nasm-ld-pipe"]
     if input_filename.startswith("./"):
         input_filename = input_filename[2:]
@@ -484,17 +483,19 @@ def main(input_filename="fizzbuzz.morth", output="nasm"):
     ctx.compile("main")
     output_asm = f"out/{input_filename[:input_filename.rindex('.')]}.asm"
     ctx.dump(output_asm)    
-    if output == "nasm-ld":
+    if output.startswith("nasm-ld"):
         os.system(f"nasm -felf64 {output_asm}")
         BASE=output_asm[:output_asm.rindex('.')]
         os.system(f"ld {BASE}.o -o{BASE}")
-        
-        
+        if output.startswith("nasm-ld-pipe"):
+            sub = subprocess.Popen(f"./{BASE}", stdout=subprocess.PIPE)
+            t = sub.communicate(timeout=5)
+            print(sub.returncode)
+            return (sub.returncode, t[0], t[1])
 
 init_context()
 
 if __name__ == "__main__":
-    if len(sys.argv) < 2:
-        raise Exception("Required filename")
+    filename = "fizzbuzz.morth" if len(sys.argv) <=1 else sys.argv[1]
     mode = "nasm-ld" if len(sys.argv) <=2 else sys.argv[2]
-    main(sys.argv[1], mode)
+    run(sys.argv[1], mode)
