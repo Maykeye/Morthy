@@ -1,5 +1,7 @@
 #!/usr/bin/python3
 import sys
+import os
+from typing import SupportsRound
 VERBOSE=0
 class Definition:
     def __init__(self, name, value, location):
@@ -472,16 +474,27 @@ def init_context():
                 Context.STR_REPLACEMENT[x + h0 + h1] = f"\\x{int(h0+h1,16):02x}"
 
     
-
-
-def main(extension=".morth"):    
-    init_context()
-    ctx = Context()
-    source = "fizzbuzz.morth" if len(sys.argv) <= 1 else sys.argv[1]
-    assert source.endswith(extension)
-    ctx.parse_file(source) 
+def main(input_filename="fizzbuzz.morth", output="nasm"):
+    
+    assert output in ["nasm", "nasm-ld", "nasm-ld-pipe"]
+    if input_filename.startswith("./"):
+        input_filename = input_filename[2:]
+    ctx = Context()        
+    ctx.parse_file(input_filename) 
     ctx.compile("main")
-    ctx.dump(f"out/{source[:-len(extension)]}.asm")
+    output_asm = f"out/{input_filename[:input_filename.rindex('.')]}.asm"
+    ctx.dump(output_asm)    
+    if output == "nasm-ld":
+        os.system(f"nasm -felf64 {output_asm}")
+        BASE=output_asm[:output_asm.rindex('.')]
+        os.system(f"ld {BASE}.o -o{BASE}")
+        
+        
+
+init_context()
 
 if __name__ == "__main__":
-    main()
+    if len(sys.argv) < 2:
+        raise Exception("Required filename")
+    mode = "nasm-ld" if len(sys.argv) <=2 else sys.argv[2]
+    main(sys.argv[1], mode)
