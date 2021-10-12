@@ -1,7 +1,7 @@
 :i "generic-x86-64.morth"
 
 
-:$ type ( ptr addr -- ) [
+:$ type ( ptr len -- ) [
     1 ( stdout )
     1 ( write ) ->rax ( syscall )
     ->rdi ( stdout )
