@@ -476,12 +476,18 @@ def init_context():
     
 def run(input_filename="fizzbuzz.morth", output="nasm"):
     assert output in ["nasm", "nasm-ld", "nasm-ld-pipe"]
+    input_filename = input_filename.replace("\\","/")
     if input_filename.startswith("./"):
         input_filename = input_filename[2:]
-    ctx = Context()        
+    ctx = Context()
+    core = Context(ctx)
+    core.parse_file("std.morth")
     ctx.parse_file(input_filename) 
     ctx.compile("main")
-    output_asm = f"out/{input_filename[:input_filename.rindex('.')]}.asm"
+    basename = input_filename
+    if (slash := input_filename.rfind('/')) >= 0:
+        basename = input_filename[slash+1:]
+    output_asm = f"out/{basename[:basename.rindex('.')]}.asm"
     ctx.dump(output_asm)    
     if output.startswith("nasm-ld"):
         os.system(f"nasm -felf64 {output_asm}")

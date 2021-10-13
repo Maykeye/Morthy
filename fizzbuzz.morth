@@ -1,6 +1,4 @@
 
-:i "std.morth"
-
 :varc fizzbuzz-step-buf 3
 
 : memset (value addr n --) [
