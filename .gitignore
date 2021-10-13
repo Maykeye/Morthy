@@ -1,5 +1,7 @@
 out
 fizzbuzz
 .vscode
+__pycache__
+.pytest_cache
 x
 2
