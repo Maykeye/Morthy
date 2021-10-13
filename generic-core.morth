@@ -61,6 +61,18 @@
     /mod drop
 ]
 
+
+
+
+
 :$ cr [ "\n" 1 type ]
+
+:$ hex-digit (n -- "0123456789ABCDEF"[n&0xf]) [    
+    15 and 48 + ( top in '0123456789:;<=>?' )
+    dup '9' > negate (ch ch>'9'&?) 
+    7 and +
+
+
+]
 
 ( vim: set filetype=forth : )

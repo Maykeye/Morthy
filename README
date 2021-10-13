@@ -1,0 +1,38 @@
+# Verbs:
+
+## Debug
+* sentinel!
+    Assume that next push to the stack happens to address at N,
+    sentinel! puts integer (C+N) to stack,
+    where C is implementation defined.
+
+    It's needed as if stack sits around 0x10, random data 0x10
+    can be mistaked for sentinel later
+
+* sentinel@
+    assume that next pop happens at address N, 
+    the verb will pops the value and check if it's equal to C+N 
+    if it is, continues as normal.
+    Otherwise implementation defined crash happens
+
+## Relational operation
+In all of these operation the result is either 0(false) or 1(true)
+* =, !=
+    Equality, inequality
+* &lt;, &gt;
+    Signed comparison
+
+
+## I/O
+* hex-digit (n -- ch)
+    takes last 4 bits of the number and converts them 
+    to human-readable character represention
+
+## 
+System:
+
+* exit (n -- noreturn) exit 
+
+    terminates the program, returning n as the error code.
+    UB: If stack is not balanced.
+

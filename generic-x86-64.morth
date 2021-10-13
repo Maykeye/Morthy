@@ -11,6 +11,22 @@
 
 :i "generic-core.morth"
 
+( n -- 0b1111111...111 if n != 0)
+:$ int-to-bool [
+    ->r8
+    :.text "xor r9, r9"
+    :.text "test r8, r8"
+    :.text "setnz r9b"
+    :.text "push r9"
+]
+
+:$ and [
+    ->r8
+    :.text "and qword [rsp], r8"
+]
+:$ negate [ :.text "neg qword [rsp]" ]
+:$ bool-to-mask [ int-to-bool negate ]
+
 :$ drop [ :.text "pop r8" ]
 :$ dup [ :.text "mov r8, [rsp]" :.text "push r8" ]
 
@@ -25,6 +41,10 @@
 :$ <-rax  [ :.text "push rax" ]
 :$ <-rdx  [ :.text "push rdx" ]
 :$ <-r8   [ :.text "push r8" ]
+:$ |->r8  [ :.text "mov r8, [rsp]" ]
+:$ <-|r8  [ :.text "mov [rsp], r8" ]
+:$ 0->rdx [ :.text "xor rdx, rdx" ]
+
 :$ :asm-test-rbx  [ :e "test rbx, rbx"]
 
 :$ :int-literal [ 
@@ -124,12 +144,48 @@
     <-r8
 ]
 
-:$ = [ ->r8 ->r9
-    :.text "xor rdx, rdx"
+:$ < (a b -- $signed(a<b) ) [ ->r8 ->r9 0->rdx    
+    :.text "cmp r9, r8"
+    :.text "setl dl"
+    <-rdx
+]
+
+:$ > (a b -- $signed(a<b) ) [ ->r8 ->r9 0->rdx    
+    :.text "cmp r9, r8"
+    :.text "setg dl"
+    <-rdx
+]
+
+
+:$ = [ ->r8 ->r9 0->rdx
     :.text "cmp r8, r9"
     :.text "sete dl"
     <-rdx
 ]
+:$ != [ ->r8 ->r9 0->rdx
+    :.text "cmp r8, r9"
+    :.text "setne dl"
+    <-rdx
+]
+
+:$ :sentinel->rdx [
+    0->rdx
+    :.text "bts rdx, 63"
+    :.text "add rdx, rsp"
+]
+
+:$ sentinel! [ :sentinel->rdx <-rdx ]
+:$ sentinel@ [
+    ->r8
+    :sentinel->rdx 
+    :.text "cmp rdx, r8"
+    :.text `je {CL+}`
+    :.text "mov rdi, 255"
+    :.text "mov rax, 60"
+    :.text "syscall ; abort"
+    :.text `{CL!}:`
+]
+
 
 :$ :- [ :.text "call do_pop" ]
 :$ :+ [ ->r8 
@@ -177,6 +233,7 @@
     :.text "test rax, rax"
     :.text `jnz {NAME}_start`
 ]
+
 
 
 

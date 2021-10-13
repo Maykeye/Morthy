@@ -42,12 +42,16 @@
         1-
         dup repnz        
     ] iff
-    
+    2drop    
 ]
 
+: run [ 
+    sentinel! 
+    100 fizzbuzz
+    sentinel@ 
+]
 
-: main [ 100 fizzbuzz
-  0 exit   ]
+: main [ run 0 exit   ]
 
  
 ( vim: set filetype=forth : )
