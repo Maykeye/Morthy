@@ -262,14 +262,12 @@ class Context:
             if self.consume('('):
                 depth = 1
                 while depth >= 1:
-                    if self.consume(')'):
-                        depth -= 1
-                        continue
-                    if self.consume('('):
-                        depth += 1
-                        continue
                     if self.eof():
                         self.error(f"EOF reached while parsing comment at {step_pos}, current nesting depth is {depth}")
+                    if self.peek() == ')':
+                        depth -= 1
+                    elif self.peek() == '(':
+                        depth += 1
                     self.goto_next_char()
             if step_pos == self.pos:
                 break
