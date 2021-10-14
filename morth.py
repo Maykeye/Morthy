@@ -469,8 +469,7 @@ def run(input_filename="fizzbuzz.morth", output="nasm"):
     if input_filename.startswith("./"):
         input_filename = input_filename[2:]
     ctx = Context()
-    core = Context(ctx)
-    core.parse_file("std.morth")
+    Context(ctx).parse_file("std.morth")
     ctx.parse_file(input_filename)
     ctx.compile("main")
     basename = input_filename
@@ -484,9 +483,8 @@ def run(input_filename="fizzbuzz.morth", output="nasm"):
         os.system(f"ld {BASE}.o -o{BASE}")
         if output.startswith("nasm-ld-pipe"):
             sub = subprocess.Popen(f"./{BASE}", stdout=subprocess.PIPE)
-            t = sub.communicate(timeout=5)
-            print(sub.returncode)
-            return (sub.returncode, t[0], t[1])
+            stdouterr = sub.communicate(timeout=5)
+            return (sub.returncode, stdouterr[0], stdouterr[1])
 
 init_context()
 
