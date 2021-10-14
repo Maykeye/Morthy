@@ -42,7 +42,6 @@ class Context:
         self.last_lit=""
         self.bstrlen=0
         self.last_name=""
-        self.main_function=None
 
     def parse_file(self, filename):
         if VERBOSE:
@@ -304,9 +303,8 @@ class Context:
 
         if func not in self.code:
             self.error(f"main function '{func}' is not defined")
-        self.main_function = self.code[func]
-        self.current_func = self.main_function
-        self.function_to_compile = [self.main_function]
+        self.current_func = self.code[func]
+        self.function_to_compile = [self.current_func]
 
         if ":prologue" in self.macro:
             self.last_lit = self.code[func].name
@@ -320,11 +318,6 @@ class Context:
                 continue
             self.current_func = func
             func.compiled = True
-
-            self.main_function = func
-            while self.main_function.parent:
-                self.main_function = self.main_function.parent
-
             self.last_name = func.name
             self.do_compile_macro(":code-block-prologue")
             for token in func.value:
@@ -404,7 +397,6 @@ class Context:
                     assert prohibited not in string
             string = string.replace("{LIT}", self.last_lit)
             string = string.replace("{NAME}", self.last_name)
-            string = string.replace("{MAIN}", self.main_function.name)
             string = string.replace("{BLOCK_DEPTH}", str(self.current_func.depth))
             string = string.replace("{CL+}", self.make_label("L", 1))
             string = string.replace("{CL-}", self.make_label("L", -1))
