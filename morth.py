@@ -366,12 +366,11 @@ class Context:
             self.error(f"unknown word: {token}")
         elif type(token) == list:
             self.last_label_num += 1
-            name = f"P{self.last_label_num:07X}"
-            pseudo = Definition(name, token, self.pos)
-            pseudo.parent = self.current_func
-            pseudo.depth = self.current_func.depth+1
-            self.function_to_compile.append(pseudo)
-            self.last_lit = name
+            block = Definition(self.make_label('P'), token, self.pos)
+            block.parent = self.current_func
+            block.depth = self.current_func.depth+1
+            self.function_to_compile.append(block)
+            self.last_lit = block.name
             return self.do_compile_macro(":code-block-ref")
         else:
             self.error("unknown token")
