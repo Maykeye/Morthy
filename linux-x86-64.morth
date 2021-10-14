@@ -10,6 +10,16 @@
     syscall
 ]
 
+:$ emit ( c -- ) [ 
+    :.text "mov rax, 1"
+    :.text "mov rdi, 1"
+    :.text "mov rdx, 1"
+    :.text "mov rsi, rsp"
+    syscall
+    :.text "pop rax"
+    
+]
+
 :$ :prologue [
     :.text "BITS 64"
     :.text "SECTION .text"
