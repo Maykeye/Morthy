@@ -77,5 +77,10 @@
     hex-digit emit
 ]
 
+: emitXXXX (n -- emit a 2-byte world of n) [
+    dup 8 shr emitXX
+    emitXX
+]
+
 
 ( vim: set filetype=forth : )

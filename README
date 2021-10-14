@@ -34,8 +34,10 @@ In all of these operation the result is either 0(false) or 1(true)
     to human-readable character represention
 
 * emitXX (n -- )
-    Pops a value and prints its least-significant byte in human readable form. Byte is always printed using two characters,
-    i.e. leading zero is not truncated.
+    Pops a value and prints its least-significant byte in human-readable form. Byte is always printed using two characters, i.e. leading zero is not truncated.
+
+* emitXXXX (n -- )
+    Pops a value and prints its least-significant 2-byte word in human-readable form. Word is always printed using four characters, i.e. leading zero is not truncated.
 
 ## Shorthands
 
