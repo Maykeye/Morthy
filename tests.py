@@ -56,3 +56,9 @@ def test_relop(s, res):
 
 def test_emit():
     assert run_stdout_test(f"49 48 emit emit") == "01"
+
+@pytest.mark.parametrize("num",[0, 10, 255, 256, 65534])
+def test_emitxx(num):
+    expect = num & 0xFF
+    assert run_stdout_test(f"{num} emitXX") == f"{expect:02X}"
+

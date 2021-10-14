@@ -1,6 +1,6 @@
-( 
-    channel 0 -- code 
-    channel 1 -- read only data 
+(
+    channel 0 -- code
+    channel 1 -- read only data
     channel 2 -- bss
 )
 
@@ -24,6 +24,11 @@
     ->r8
     :.text "and qword [rsp], r8"
 ]
+:$ shr ( a n -- a>>n ) [
+    ->rcx
+    :.text "shr qword [rsp], cl"
+]
+
 :$ negate [ :.text "neg qword [rsp]" ]
 :$ bool-to-mask [ int-to-bool negate ]
 
@@ -41,13 +46,14 @@
 :$ <-rax  [ :.text "push rax" ]
 :$ <-rdx  [ :.text "push rdx" ]
 :$ <-r8   [ :.text "push r8" ]
+:$ <-r9   [ :.text "pop r9" ]
 :$ |->r8  [ :.text "mov r8, [rsp]" ]
 :$ <-|r8  [ :.text "mov [rsp], r8" ]
 :$ 0->rdx [ :.text "xor rdx, rdx" ]
 
 :$ :asm-test-rbx  [ :e "test rbx, rbx"]
 
-:$ :int-literal [ 
+:$ :int-literal [
     :.text `mov r8, {LIT}`
     :.text `push r8`
 ]
@@ -64,7 +70,7 @@
 
 
 
-:$ :int-literal-u8 [ 
+:$ :int-literal-u8 [
     :.text `push qword {LIT}`
 ]
 
@@ -87,31 +93,31 @@
 ]
 
 
-:$ iff [    
-    ->rax ->rbx :asm-test-rbx   
+:$ iff [
+    ->rax ->rbx :asm-test-rbx
     :.text `jz {CL+}`
     :.text `call rax`
     :.text `{CL!}:`
 ]
-:$ ifz [    
-    ->rax ->rbx :asm-test-rbx       
+:$ ifz [
+    ->rax ->rbx :asm-test-rbx
     :.text `jnz {CL+}`
     :.text `call rax`
     :.text `{CL!}:`
 ]
 
 :$ /mod [
-    ->r8 ->rax 
+    ->r8 ->rax
     :.text "xor rdx, rdx"
     :.text "div r8"
     <-rdx <-rax
 ]
 
-:$ + [ 
+:$ + [
     ->r8
     :.text "add qword [rsp], r8"
 ]
-:$ - [ 
+:$ - [
     ->r8
     :.text "sub qword [rsp], r8"
 ]
@@ -120,12 +126,12 @@
 :$ 1+ [  :.text "add qword [rsp], 1" ]
 :$ 2+ [  :.text "add qword [rsp], 2" ]
 
-:$ syscall [ 
+:$ syscall [
     ( rax: syscall id )
     ( rdi: arg1 as in C)
     ( rsi: arg2 as in C)
     ( rdx: arg3 as in C)
-    :.text "syscall" 
+    :.text "syscall"
 ]
 
 :$ nip [ ->r8 ->r9 <-r8 ]
@@ -138,19 +144,19 @@
     :.text "mov [r9], r8b"
 ]
 
-:$ c@ [ ->r8   
+:$ c@ [ ->r8
     :.text "mov r8b, [r8]"
     :.text "and r8, 255"
     <-r8
 ]
 
-:$ < (a b -- $signed(a<b) ) [ ->r8 ->r9 0->rdx    
+:$ < (a b -- $signed(a<b) ) [ ->r8 ->r9 0->rdx
     :.text "cmp r9, r8"
     :.text "setl dl"
     <-rdx
 ]
 
-:$ > (a b -- $signed(a<b) ) [ ->r8 ->r9 0->rdx    
+:$ > (a b -- $signed(a<b) ) [ ->r8 ->r9 0->rdx
     :.text "cmp r9, r8"
     :.text "setg dl"
     <-rdx
@@ -177,7 +183,7 @@
 :$ sentinel! [ :sentinel->rdx <-rdx ]
 :$ sentinel@ [
     ->r8
-    :sentinel->rdx 
+    :sentinel->rdx
     :.text "cmp rdx, r8"
     :.text `je {CL+}`
     :.text "mov rdi, 255"
@@ -188,7 +194,7 @@
 
 
 :$ :- [ :.text "call do_pop" ]
-:$ :+ [ ->r8 
+:$ :+ [ ->r8
     :.text "mov r8, [rsp + r8 * 8]"
     <-r8
 ]
@@ -213,7 +219,7 @@
     :.text `mov [r8], r9`
     :.text `mov [_callstack_top_ptr], r8`
     :.text `{NAME}_start:`
-   
+
 ]
 :$ :code-block-epilogue [
     :.text `{NAME}_end:`

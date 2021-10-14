@@ -22,11 +22,22 @@ In all of these operation the result is either 0(false) or 1(true)
 * &lt;, &gt;
     Signed comparison
 
+## Binary operations
+
+* shr (a n -- a>>n)
+    Pops two values (`n` then `a`), shifts `a` right by `n` bits,
+    leaving last bit zero. Then the result is pushed to the stack.
 
 ## I/O
 * hex-digit (n -- ch)
     takes last 4 bits of the number and converts them 
     to human-readable character represention
+
+* emitXX (n -- )
+    Pops a value and prints its least-significant byte in human readable form. Byte is always printed using two characters,
+    i.e. leading zero is not truncated.
+
+
 
 ## 
 System:

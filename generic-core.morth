@@ -14,7 +14,7 @@
 :$ pick (x0..xu u -- x0..xu xu) [ :+ ]
 
 :$ rot (..abc-bca) [
-    0 2 :v (cba)   
+    0 2 :v (cba)
     1 2 :v (bca)
 ]
 
@@ -35,7 +35,7 @@
  :-       ( b a )
 ]
 :$ 2drop [ drop drop ]
-:$ 2nip [ 2 :- 2 :- ] 
+:$ 2nip [ 2 :- 2 :- ]
 :$ 2dup [ over over ]
 :$ 2over [ 3 :+ 3 :+ ]
 
@@ -67,12 +67,16 @@
 
 :$ cr [ "\n" 1 type ]
 
-:$ hex-digit (n -- "0123456789ABCDEF"[n&0xf]) [    
+:$ hex-digit (n -- "0123456789ABCDEF"[n&0xf]) [
     15 and 48 + ( top in '0123456789:;<=>?' )
-    dup '9' > negate (ch ch>'9'&?) 
+    dup '9' > negate (ch ch>'9'&?)
     7 and +
+]
 
-
+: emitXX (n -- emit a byte of n) [
+    dup 4 shr
+        hex-digit emit
+    hex-digit emit
 ]
 
 ( vim: set filetype=forth : )
