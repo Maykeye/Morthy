@@ -10,14 +10,14 @@
     syscall
 ]
 
-:$ emit ( c -- ) [ 
+:$ emit ( c -- ) [
     :.text "mov rax, 1"
     :.text "mov rdi, 1"
     :.text "mov rdx, 1"
     :.text "mov rsi, rsp"
     syscall
     :.text "pop rax"
-    
+
 ]
 
 :$ :prologue [
@@ -30,7 +30,7 @@
     :.text "_start_hlt:"
     :.text "hlt"
     :do_pop
-    
+
     :.data ""
     :.data "SECTION .data"
     :.data "_callstack_top_ptr: dq _callstack"

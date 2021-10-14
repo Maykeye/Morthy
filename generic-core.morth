@@ -57,13 +57,11 @@
     5 3 :v (..CDEFAB)
 ]
 
+:$ 1shr [ 1 shr ]
+
 :$ mod (a b -- a%b) [
     /mod drop
 ]
-
-
-
-
 
 :$ cr [ "\n" 1 type ]
 
@@ -78,5 +76,6 @@
         hex-digit emit
     hex-digit emit
 ]
+
 
 ( vim: set filetype=forth : )

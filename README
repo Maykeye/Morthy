@@ -10,8 +10,8 @@
     can be mistaked for sentinel later
 
 * sentinel@
-    assume that next pop happens at address N, 
-    the verb will pops the value and check if it's equal to C+N 
+    assume that next pop happens at address N,
+    the verb will pops the value and check if it's equal to C+N
     if it is, continues as normal.
     Otherwise implementation defined crash happens
 
@@ -30,19 +30,23 @@ In all of these operation the result is either 0(false) or 1(true)
 
 ## I/O
 * hex-digit (n -- ch)
-    takes last 4 bits of the number and converts them 
+    takes last 4 bits of the number and converts them
     to human-readable character represention
 
 * emitXX (n -- )
     Pops a value and prints its least-significant byte in human readable form. Byte is always printed using two characters,
     i.e. leading zero is not truncated.
 
+## Shorthands
 
+* 1+ increase top of the stack by 1
+* 1- decrease top of the stack by 1
+* 1shr shift top of the stack by 1 bit.
 
-## 
+##
 System:
 
-* exit (n -- noreturn) exit 
+* exit (n -- noreturn) exit
 
     terminates the program, returning n as the error code.
     UB: If stack is not balanced.

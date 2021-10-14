@@ -5,8 +5,8 @@ import subprocess
 VERBOSE=0
 class Definition:
     def __init__(self, name, value, location):
-        self.name = name 
-        self.value = value 
+        self.name = name
+        self.value = value
         self.location = location
         self.compiled = False
         self.parent = None
@@ -14,12 +14,12 @@ class Definition:
 
 class Location:
     def __init__(self, filename, offset, row, col):
-        self.offset = offset 
+        self.offset = offset
         self.filename = filename
-        self.row = row 
-        self.col = col 
+        self.row = row
+        self.col = col
     def __str__(self):
-        return f"{self.filename}:{self.row}:{self.col}"    
+        return f"{self.filename}:{self.row}:{self.col}"
     def __eq__(self, other):
         return self.offset == other.offset
 
@@ -35,9 +35,9 @@ class Context:
         self.macro = included_from.macro if included_from else {}
         self.vars = included_from.vars if included_from else {}
         self.code = included_from.code if included_from else {}
-        self.check_token_names = True        
+        self.check_token_names = True
         self.emit_channel = None
-        self.channels = [ [] for _ in range(10) ]    
+        self.channels = [ [] for _ in range(10) ]
         self.last_label_num = 0
         self.last_lit=""
         self.bstrlen=0
@@ -47,10 +47,10 @@ class Context:
     def parse_file(self, filename):
         if VERBOSE:
             print(f"Parsing {filename}")
-        self.pos = Location(filename, 0, 1, 1)        
+        self.pos = Location(filename, 0, 1, 1)
         self.text = open(filename).read()
         self.parse()
-    
+
     def parse(self):
 
         while True:
@@ -61,21 +61,21 @@ class Context:
                 continue
 
             self.error("unexpected token")
-    
+
     def try_parse_system_directive(self):
         if self.peek() != ":":
-            return 
+            return
         bak = self.pos
         if self.peek(1) == "i":
             return self.parse_include()
         if self.peek(1) == '$':
             return self.parse_macro()
         if self.peek(1) in Context.TOKEN_SEP:
-            return self.parse_code()        
+            return self.parse_code()
         if self.consume(":varc"):
             if self.peek() in self.TOKEN_SEP:
                 return self.parse_var(True)
-            pos = bak            
+            pos = bak
         return False
 
     def parse_var(self, is_char=False):
@@ -88,7 +88,7 @@ class Context:
         self.vars[var_name] = self.make_unique(var_name, (token, is_char), bak)
         return True
 
-        
+
 
     def parse_macro(self):
         self.goto_next_char()
@@ -96,15 +96,15 @@ class Context:
         start = self.skip_ws_comments()
         if start == self.pos:
             self.error("Macro definition(:$) must be followed by a whitespace.")
-        
+
         token_name = self.read_id_token()
-        body = self.parse_code_block(force_expand=token_name)        
+        body = self.parse_code_block(force_expand=token_name)
         self.macro[token_name] = Definition(token_name,body,start)
         return True
 
     def parse_code(self):
         self.goto_next_char()
-        start = self.skip_ws_comments()        
+        start = self.skip_ws_comments()
         token_name = self.read_id_token()
         body = self.parse_code_block()
         self.code[token_name] = self.make_unique(token_name,body,start)
@@ -120,7 +120,7 @@ class Context:
 
     def check_token_name(self, token:str):
         if not self.check_token_names:
-            return  
+            return
         if token[0] in Context.STR_LITERAL:
             return
         if token.startswith("[") and token.endswith("]"):
@@ -144,7 +144,7 @@ class Context:
         while not self.eof():
             self.skip_ws_comments()
             if self.peek() == "]" and self.peek(1) in Context.TOKEN_SEP:
-                break            
+                break
 
             if self.peek() == "[" and self.peek(1) in Context.TOKEN_SEP:
                 token = self.parse_code_block(force_expand)
@@ -152,7 +152,7 @@ class Context:
             else:
                 token = self.read_token(f" for code block from {start_pos}")
                 self.check_token_name(token)
-                                        
+
 
                 if token == force_expand and token in self.macro:
                     for child_token in self.macro[token]:
@@ -201,8 +201,8 @@ class Context:
                     found = True
                     break
             if not found:
-                self.error("Unable to find \\-string-replacement")           
-        return delimiter + string         
+                self.error("Unable to find \\-string-replacement")
+        return delimiter + string
 
     def read_id_token(self):
         token = self.read_token()
@@ -214,15 +214,15 @@ class Context:
     def parse_include(self):
         if self.peek(2) not in self.WSPACE + '"':
             return False
-        self.goto_next_char()                
+        self.goto_next_char()
         self.goto_next_char()
         self.skip_ws_comments()
         self.must_consume('"', "Include expects string literal")
-        
+
         path_start = self.skip_while(lambda x:x not in '"\n')
         path = self.substr(path_start, self.pos)
         self.must_consume('"', "Incorrect include path")
-        
+
         child = Context(self)
         child.parse_file(path)
 
@@ -277,20 +277,20 @@ class Context:
 
     def eof(self):
         return self.pos.offset >= len(self.text)
-    
+
     def goto_next_char(self):
         new_offset = self.pos.offset + 1
         if self.peek() == "\n":
-            self.pos = Location(self.pos.filename, 
+            self.pos = Location(self.pos.filename,
                 new_offset,  self.pos.row + 1, 1)
         else:
-            self.pos = Location(self.pos.filename, 
+            self.pos = Location(self.pos.filename,
                 new_offset, self.pos.row, self.pos.col + 1)
 
     def error(self, message):
         included_from = ""
         parent = self.included_from
-        while parent:        
+        while parent:
             included_from += f"\n(included from {self.included_from.pos})"
             parent = parent.included_from
         raise Exception(f"{self.pos}:{message}{included_from}")
@@ -309,20 +309,20 @@ class Context:
         self.main_function = self.code[func]
         self.current_func = self.main_function
         self.function_to_compile = [self.main_function]
-        
+
         if ":prologue" in self.macro:
             self.last_lit = self.code[func].name
             self.do_compile_macro(":prologue")
         self.do_compile()
-            
+
     def do_compile(self):
         while self.function_to_compile:
             func : Definition = self.function_to_compile.pop()
             if func.compiled:
-                continue        
+                continue
             self.current_func = func
             func.compiled = True
-            
+
             self.main_function = func
             while self.main_function.parent:
                 self.main_function = self.main_function.parent
@@ -333,11 +333,11 @@ class Context:
                 self.do_compile_token(token)
             self.do_compile_macro(":code-block-epilogue")
 
-    
+
     def do_compile_token(self, token):
         if self.emit_channel is not None and (type(token) != str or token[0] not in Context.STR_LITERAL):
             self.error(":e-EMIT directive found, but it's not followed by a string literal")
-        
+
         if type(token) == str:
             token : str = token
             if token[0:1] in Context.STR_LITERAL:
@@ -363,16 +363,16 @@ class Context:
                 var = self.vars[token]
                 self.do_compile_variable(var)
                 self.last_lit = var.name
-                return self.do_compile_macro(":variable-ref")                
+                return self.do_compile_macro(":variable-ref")
 
-            self.error(f"unknown word: {token}")            
+            self.error(f"unknown word: {token}")
         elif type(token) == list:
             self.last_label_num += 1
             name = f"P{self.last_label_num:07X}"
             pseudo = Definition(name, token, self.pos)
             pseudo.parent = self.current_func
             pseudo.depth = self.current_func.depth+1
-            self.function_to_compile.append(pseudo)            
+            self.function_to_compile.append(pseudo)
             self.last_lit = name
             return self.do_compile_macro(":code-block-ref")
         else:
@@ -389,7 +389,7 @@ class Context:
         if is_char:
             return self.do_compile_macro(":global-variable-decl-char")
         return self.do_compile_macro(":global-variable-decl-cell")
-        
+
     def make_label(self, pfx, offset=0):
         return f"{pfx}{self.last_label_num+offset:07X}"
 
@@ -404,7 +404,7 @@ class Context:
             if "{CL!}" in string:
                 self.last_label_num += 1
                 for prohibited in ["{CL+}", "{CL}", "{CL-}"]:
-                    assert prohibited not in string                
+                    assert prohibited not in string
             string = string.replace("{LIT}", self.last_lit)
             string = string.replace("{NAME}", self.last_name)
             string = string.replace("{MAIN}", self.main_function.name)
@@ -441,12 +441,12 @@ class Context:
         self.last_lit = str(i)
         if 0 <= i <= 255 and ":int-literal-u8" in self.macro:
             return self.do_compile_macro(":int-literal-u8")
-        
+
         if ":int-literal" not in self.macro:
             self.error(":int-literal macro is not defined")
 
         self.do_compile_macro(":int-literal")
-        
+
     def dump(self, name):
         with open(name, "w") as f:
             for i, channel in enumerate(self.channels):
@@ -457,7 +457,7 @@ class Context:
                     if ':' not in s:
                         s = "    " + s
                     print(s, file=f)
-        
+
 
 def init_context():
     for src, dst in [
@@ -473,7 +473,7 @@ def init_context():
             for h1 in "0123456789ABCDEFabcdef":
                 Context.STR_REPLACEMENT[x + h0 + h1] = f"\\x{int(h0+h1,16):02x}"
 
-    
+
 def run(input_filename="fizzbuzz.morth", output="nasm"):
     assert output in ["nasm", "nasm-ld", "nasm-ld-pipe"]
     input_filename = input_filename.replace("\\","/")
@@ -482,13 +482,13 @@ def run(input_filename="fizzbuzz.morth", output="nasm"):
     ctx = Context()
     core = Context(ctx)
     core.parse_file("std.morth")
-    ctx.parse_file(input_filename) 
+    ctx.parse_file(input_filename)
     ctx.compile("main")
     basename = input_filename
     if (slash := input_filename.rfind('/')) >= 0:
         basename = input_filename[slash+1:]
     output_asm = f"out/{basename[:basename.rindex('.')]}.asm"
-    ctx.dump(output_asm)    
+    ctx.dump(output_asm)
     if output.startswith("nasm-ld"):
         os.system(f"nasm -felf64 {output_asm}")
         BASE=output_asm[:output_asm.rindex('.')]

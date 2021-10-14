@@ -35,7 +35,7 @@ def test_hex_digit_digits(num):
 @pytest.mark.parametrize("num",[10,11,12,13,14,15])
 def test_hex_digit_hex(num):
     assert run_errcode_test(f": main [ {num} hex-digit exit ] ") == 55+num
-# TODO: wrap up    
+# TODO: wrap up
 
 @pytest.mark.parametrize("s",["", "1 drop", "[ 1 ] drop", "3 swap nip"])
 def test_sentinel_balanced(s):
@@ -45,7 +45,7 @@ def test_sentinel_balanced(s):
 def test_sentinel_unbalanced(s):
     assert run_errcode_test(f": main [ sentinel! {s} sentinel@ 11 exit ] ") == 255
 
-@pytest.mark.parametrize(("s", "res"), 
+@pytest.mark.parametrize(("s", "res"),
    [("1 2 <", 1), ("2 1 <", 0),
     ("2 1 >", 1), ("1 2 >", 0),
     ("2 1 =", 0), ("1 1 =", 1),
@@ -62,3 +62,9 @@ def test_emitxx(num):
     expect = num & 0xFF
     assert run_stdout_test(f"{num} emitXX") == f"{expect:02X}"
 
+def test_incr():
+    assert run_stdout_test(f"11 1+ emitXX") == f"0C"
+def test_indecr():
+    assert run_stdout_test(f"11 1- emitXX") == f"0A"
+def test_1shr():
+    assert run_stdout_test(f"11 1shr emitXX") == f"05"

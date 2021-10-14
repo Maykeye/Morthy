@@ -4,7 +4,7 @@
 : memset (value addr n --) [
     dup [
         ( value addr n )
-        1- -rot ( .. n-1 value addr  ) 
+        1- -rot ( .. n-1 value addr  )
         2dup c! ( put value into addr, stack the same )
         1+ ( n-1 value addr+1 )
         rot ( value addr n-1 )
@@ -20,38 +20,38 @@
     dup  5 mod [ drop "buzz" $bstrlen leave ] ifz
     dup  3 mod [ drop "fizz" $bstrlen leave ] ifz
 
-    ( first we need to convert hundreds ) 
+    ( first we need to convert hundreds )
 
-    100 /mod ( ... n%100 n/100 ) '0' + fizzbuzz-step-buf c! 
+    100 /mod ( ... n%100 n/100 ) '0' + fizzbuzz-step-buf c!
     10 /mod ( n%10, n/10 ) '0' + fizzbuzz-step-buf 1+ c!
     '0' + fizzbuzz-step-buf 2+ c!
 
-    3 fizzbuzz-step-buf 
+    3 fizzbuzz-step-buf
     dup c@ '0' = [ 1+ swap 1- swap ] iff
     dup c@ '0' = [ 1+ swap 1- swap ] iff
-    
+
 
     swap
-    
+
 ]
 
 : fizzbuzz ( n -- ) [
-    dup dup [  
+    dup dup [
         (n i)
         2dup - 1+ fizzbuzz-step puts
         1-
-        dup repnz        
+        dup repnz
     ] iff
-    2drop    
+    2drop
 ]
 
-: run [ 
-    sentinel! 
+: run [
+    sentinel!
     100 fizzbuzz
-    sentinel@ 
+    sentinel@
 ]
 
 : main [ run 0 exit   ]
 
- 
+
 ( vim: set filetype=forth : )
