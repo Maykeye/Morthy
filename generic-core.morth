@@ -77,10 +77,26 @@
     hex-digit emit
 ]
 
-: emitXXXX (n -- emit a 2-byte world of n) [
+: emitXXXX (n -- emit a 2-byte word of n) [
     dup 8 shr emitXX
     emitXX
 ]
+
+: emitXXXXXXXX (n -- emit a 4-byte word of n) [
+    dup 16 shr emitXXXX
+    emitXXXX
+]
+
+: emitXXXXXXXXXXXXXXXX  (n -- emit a 8-byte word of n) [
+    dup 32 shr emitXXXXXXXX
+    emitXXXXXXXX
+]
+
+:$ emitX8  [ emitXX ]
+:$ emitX16 [ emitXXXX ]
+:$ emitX32 [ emitXXXXXXXX ]
+:$ emitX64 [ emitXXXXXXXXXXXXXXXX ]
+
 
 
 ( vim: set filetype=forth : )

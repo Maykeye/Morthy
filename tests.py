@@ -67,10 +67,25 @@ def test_emitxxxx(num):
     expect = num & 0xFFFF
     assert run_stdout_test(f"{num} emitXXXX") == f"{expect:04X}"
 
+@pytest.mark.parametrize("num",[0, 10, 255, 256, 65534, 0x1234, 0xF1234, 0x12345678,0x80706050,2**64-1, 2**64-10])
+def test_emitxxxxxxxx(num):
+    expect = num & 0xFFFFFFFF
+    assert run_stdout_test(f"{num} emitXXXXXXXX") == f"{expect:08X}"
+
+
 def test_incr():
     assert run_stdout_test(f"11 1+ emitXX") == f"0C"
 def test_indecr():
     assert run_stdout_test(f"11 1- emitXX") == f"0A"
 def test_1shr():
     assert run_stdout_test(f"11 1shr emitXX") == f"05"
-
+def test_x8():
+    assert run_stdout_test(f"127 emitX8") == f"7F"
+def test_x16():
+    assert run_stdout_test(f"32769 emitX16") == f"8001"
+def test_x32():
+    assert run_stdout_test(f"268435466 emitX32") == f"1000000A"
+def test_x64():
+    assert run_stdout_test(f"1162849439785405935 emitX64") == f"1023456789ABCDEF"
+def test_x64_2():
+    assert run_stdout_test(f"17870283323409323519 emitX64") == f"F8000000776655FF"
