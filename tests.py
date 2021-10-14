@@ -16,9 +16,10 @@ def run_stdout_test(src):
     return out.decode('utf-8')
 
 @pytest.mark.parametrize("num",[0,1,2,10,100,1000,12345,102030,1122444, 2**31, 2**63,2**64-1,0x10203040AABBCCDD])
-def test_exit0(num):
+def test_exit(num):
     assert run_errcode_test(f": main [ {num} exit ]") == num & 0xff
-
+def test_nested_comments():
+    assert run_errcode_test(f": (foo ( b)) main(poo) [(1)10(2(3))exit ] ") == 10
 def test_func_call():
     assert run_errcode_test(
         ": run [ run1 23 + ] \n"
