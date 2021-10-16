@@ -1,5 +1,10 @@
 # Verbs:
 
+## Stack operations
+
+* `xchg` (xb.. xa.. x2 x1 x0 a b -- xa.. xb.. x2 x1 x0)
+    Swaps arbitrary cells
+
 ## Debug
 * `sentinel!` ( -- S)
     Assume that next push to the stack happens to address at `N`,

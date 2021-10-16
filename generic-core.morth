@@ -9,6 +9,10 @@
 :$ tuck (AB-BAB) [ 0 :+ 2 :v ]
 :$ swap (AB-BA) [ 0 1 :v ]
 
+:$ xchg (xb.. xa.. x2 x1 x0 a b -- xa.. xb.. x2 x1 x0 | swaps arbitrary cells) [
+    :v
+]
+
 :$ puts [ type cr ]
 
 :$ pick (x0..xu u -- x0..xu xu) [ :+ ]

@@ -55,6 +55,19 @@ def test_sentinel_unbalanced(s):
 def test_relop(s, res):
     assert run_errcode_test(f": main [ {s} exit ] ") == res
 
+def test_xchg0():
+    assert run_errcode_test(f": main [ 10 20 0 1 xchg exit ] ") == 10
+
+@pytest.mark.parametrize(("s", "res"), [
+    ("10 20 30 0 0", 30),
+    ("10 20 30 0 1", 20),
+    ("10 20 30 0 2", 10),
+    ("10 20 30 1 2 xchg 0 1", 10),
+])
+def test_xchg(s, res):
+    assert run_errcode_test(f": main [ {s} xchg exit ] ") == res
+
+
 def test_emit():
     assert run_stdout_test(f"49 48 emit emit") == "01"
 
