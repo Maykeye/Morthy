@@ -1,10 +1,10 @@
 import morth
 import pytest
 
-def run_errcode_test(src):
+def run_errcode_test(src, raw=None):
     filename = "out/_unittest.morth"
     with open(filename, "w") as f:
-        f.write(src)
+        f.write(raw or f": main [ {src} exit ]")
     (res, out, err) = morth.run(filename, "nasm-ld-pipe")
     return res
 def run_stdout_test(src):
@@ -17,11 +17,11 @@ def run_stdout_test(src):
 
 @pytest.mark.parametrize("num",[0,1,2,10,100,1000,12345,102030,1122444, 2**31, 2**63,2**64-1,0x10203040AABBCCDD])
 def test_exit(num):
-    assert run_errcode_test(f": main [ {num} exit ]") == num & 0xff
+    assert run_errcode_test(f"{num}") == num & 0xff
 def test_nested_comments():
-    assert run_errcode_test(f": (foo ( b)) main(poo) [(1)10(2(3))exit ] ") == 10
+    assert run_errcode_test("", raw=f": (foo ( b)) main(poo) [(1)10(2(3))exit ] ") == 10
 def test_func_call():
-    assert run_errcode_test(
+    assert run_errcode_test("", raw=
         ": run [ run1 23 + ] \n"
         ": run1 [ run2 100 run2 ] \n"
         ": run2 [ ] \n"
@@ -31,20 +31,20 @@ def test_func_call():
 
 @pytest.mark.parametrize("num",[0,1,2,3,4,5,6,7,8,9])
 def test_hex_digit_digits(num):
-    assert run_errcode_test(f": main [ {num} hex-digit exit ] ") == 48+num
+    assert run_errcode_test(f"{num} hex-digit") == 48+num
 
 @pytest.mark.parametrize("num",[10,11,12,13,14,15])
 def test_hex_digit_hex(num):
-    assert run_errcode_test(f": main [ {num} hex-digit exit ] ") == 55+num
+    assert run_errcode_test(f"{num} hex-digit") == 55+num
 # TODO: wrap up
 
 @pytest.mark.parametrize("s",["", "1 drop", "[ 1 ] drop", "3 swap nip"])
 def test_sentinel_balanced(s):
-    assert run_errcode_test(f": main [ sentinel! {s} sentinel@ 10 exit ] ") == 10
+    assert run_errcode_test(f"sentinel! {s} sentinel@ 10") == 10
 
 @pytest.mark.parametrize("s",["drop", "3 swap"])
 def test_sentinel_unbalanced(s):
-    assert run_errcode_test(f": main [ sentinel! {s} sentinel@ 11 exit ] ") == 255
+    assert run_errcode_test(f"sentinel! {s} sentinel@ 11 ") == 255
 
 @pytest.mark.parametrize(("s", "res"),
    [("1 2 <", 1), ("2 1 <", 0),
@@ -53,10 +53,10 @@ def test_sentinel_unbalanced(s):
     ("2 1 !=", 1), ("1 1 !=", 0)
 ])
 def test_relop(s, res):
-    assert run_errcode_test(f": main [ {s} exit ] ") == res
+    assert run_errcode_test(f"{s}") == res
 
 def test_xchg0():
-    assert run_errcode_test(f": main [ 10 20 0 1 xchg exit ] ") == 10
+    assert run_errcode_test(f"10 20 0 1 xchg") == 10
 
 @pytest.mark.parametrize(("s", "res"), [
     ("10 20 30 0 0", 30),
@@ -65,14 +65,14 @@ def test_xchg0():
     ("10 20 30 1 2 xchg 0 1", 10),
 ])
 def test_xchg(s, res):
-    assert run_errcode_test(f": main [ {s} xchg exit ] ") == res
+    assert run_errcode_test(f"{s} xchg") == res
 def test_emit():
     assert run_stdout_test(f"49 48 emit emit") == "01"
 def test_do():
-    assert run_errcode_test(f": main [ 10 [ drop 1 ] do exit ]") == 1
+    assert run_errcode_test(f"10 [ drop 1 ] do") == 1
 def test_invalid_src():
     with pytest.raises(Exception) as e_info:
-        run_errcode_test(f": main [  [  ]   ")
+        run_errcode_test("", raw=f": main [  [  ]   ")
     assert "end-of-code-block expected" in str(e_info)
 @pytest.mark.parametrize("num",[0, 10, 255, 256, 65534])
 def test_emitxx(num):
