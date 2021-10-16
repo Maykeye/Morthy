@@ -27,21 +27,15 @@ def test_func_call():
         ": run2 [ ] \n"
         ": main [ run exit ]"
     ) == 123
-
-
-@pytest.mark.parametrize("num",[0,1,2,3,4,5,6,7,8,9])
+@pytest.mark.parametrize("num",[0,1,2,3,4,5,6,7,8,9,49])
 def test_hex_digit_digits(num):
-    assert run_errcode_test(f"{num} hex-digit") == 48+num
-
-@pytest.mark.parametrize("num",[10,11,12,13,14,15])
+    assert run_errcode_test(f"{num} hex-digit") == 48+(num & 0xf)
+@pytest.mark.parametrize("num",[10,11,12,13,14,15,31])
 def test_hex_digit_hex(num):
-    assert run_errcode_test(f"{num} hex-digit") == 55+num
-# TODO: wrap up
-
+    assert run_errcode_test(f"{num} hex-digit") == 55+(num & 0xf)
 @pytest.mark.parametrize("s",["", "1 drop", "[ 1 ] drop", "3 swap nip"])
 def test_sentinel_balanced(s):
     assert run_errcode_test(f"sentinel! {s} sentinel@ 10") == 10
-
 @pytest.mark.parametrize("s",["drop", "3 swap"])
 def test_sentinel_unbalanced(s):
     assert run_errcode_test(f"sentinel! {s} sentinel@ 11 ") == 255
