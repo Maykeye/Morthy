@@ -18,6 +18,11 @@ def run_stdout_test(src):
 @pytest.mark.parametrize("num",[0,1,2,10,100,1000,12345,102030,1122444, 2**31, 2**63,2**64-1,0x10203040AABBCCDD])
 def test_exit(num):
     assert run_errcode_test(f"{num}") == num & 0xff
+def test_exit_using_character_literal():
+    assert run_errcode_test(f"'0'") == 48
+def test_exit_using_hex_character_literal():
+    assert run_errcode_test(f"'\\x32'") == 50
+
 def test_nested_comments():
     assert run_errcode_test("", raw=f": (foo ( b)) main(poo) [(1)10(2(3))exit ] ") == 10
 def test_func_call():

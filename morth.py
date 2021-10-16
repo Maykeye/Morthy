@@ -175,8 +175,10 @@ class Context:
             self.error(f"token expected{context}")
         return self.substr(start, self.pos)
 
-    def read_string_token(self, ):
+    def read_string_token(self):
         delimiter = self.peek()
+        if self.text[self.pos.offset:].startswith("'\\x32"):
+            delimiter=delimiter
         self.goto_next_char()
         string = ""
         while not self.eof():
@@ -385,8 +387,13 @@ class Context:
 
     def do_compile_string(self, string):
         string_type, string = string[0], string[1:]
+        lower = string.lower()
         if string_type == "'":
-            if len(string) != 1:
+            if len(lower) == 4 and lower.startswith("\\x")\
+            and all(x in "0123456789abcdef" for x in lower[2:]):
+                return self.do_compile_int_lit(int(lower[2:],16))
+
+            if len(string) != 1 and not is_hex_char:
                 self.error("char literal must be 1 char long")
             return self.do_compile_int_lit(ord(string))
 
@@ -491,4 +498,4 @@ init_context()
 if __name__ == "__main__":
     filename = "fizzbuzz.morth" if len(sys.argv) <=1 else sys.argv[1]
     mode = "nasm-ld" if len(sys.argv) <=2 else sys.argv[2]
-    run(sys.argv[1], mode)
+    run(filename, mode)
