@@ -36,6 +36,12 @@ All of them have the form of (a b -- ?)
 
     Signed comparison
 
+## Arithmethic
+
+
+* `+` `*` `-` (a b -- n)
+    In all of these operation the result is 64 bit number(s). In case of overflow/underflow,
+
 ## Binary operations
 * `shr` (a n -- a>>n)
 

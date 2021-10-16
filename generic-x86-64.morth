@@ -46,7 +46,7 @@
 :$ <-rax  [ :.text "push rax" ]
 :$ <-rdx  [ :.text "push rdx" ]
 :$ <-r8   [ :.text "push r8" ]
-:$ <-r9   [ :.text "pop r9" ]
+:$ <-r9   [ :.text "push r9" ]
 :$ |->r8  [ :.text "mov r8, [rsp]" ]
 :$ <-|r8  [ :.text "mov [rsp], r8" ]
 :$ 0->rdx [ :.text "xor rdx, rdx" ]
@@ -78,12 +78,6 @@
     :.text `push {CL+}`
     :.rodata `{CL!}: db \`{LIT}\``
 
-]
-
-:$ exit [
-    ->rdi
-    60 ->rax
-    syscall
 ]
 
 :$ :func-call [
@@ -120,6 +114,10 @@
 :$ - [
     ->r8
     :.text "sub qword [rsp], r8"
+]
+:$ * [ ->rax ->r9
+    :.text "mul r9"
+    <-rax
 ]
 
 :$ 1- [  :.text "sub qword [rsp], 1" ]
@@ -240,9 +238,6 @@
     :.text `jnz {NAME}_start`
 ]
 
-
-
-
 :$ hlt [ :.text "hlt" ]
 
 :$ :do_pop [
@@ -265,4 +260,3 @@
 ]
 
 ( vim: set filetype=forth : )
-

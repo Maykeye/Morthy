@@ -39,7 +39,6 @@ def test_sentinel_balanced(s):
 @pytest.mark.parametrize("s",["drop", "3 swap"])
 def test_sentinel_unbalanced(s):
     assert run_errcode_test(f"sentinel! {s} sentinel@ 11 ") == 255
-
 @pytest.mark.parametrize(("s", "res"),
    [("1 2 <", 1), ("2 1 <", 0),
     ("2 1 >", 1), ("1 2 >", 0),
@@ -48,10 +47,8 @@ def test_sentinel_unbalanced(s):
 ])
 def test_relop(s, res):
     assert run_errcode_test(f"{s}") == res
-
 def test_xchg0():
     assert run_errcode_test(f"10 20 0 1 xchg") == 10
-
 @pytest.mark.parametrize(("s", "res"), [
     ("10 20 30 0 0", 30),
     ("10 20 30 0 1", 20),
@@ -76,7 +73,6 @@ def test_emitxx(num):
 def test_emitxxxx(num):
     expect = num & 0xFFFF
     assert run_stdout_test(f"{num} emitXXXX") == f"{expect:04X}"
-
 @pytest.mark.parametrize("num",[0, 10, 255, 256, 65534, 0x1234, 0xF1234, 0x12345678,0x80706050,2**64-1, 2**64-10])
 def test_emitxxxxxxxx(num):
     expect = num & 0xFFFFFFFF
@@ -99,3 +95,9 @@ def test_x64_2():
     assert run_stdout_test(f"17870283323409323519 emitX64") == f"F8000000776655FF"
 def test_x64_3():
     assert run_stdout_test("256 emitX64") == f"0000000000000100"
+def test_add():
+    assert run_errcode_test("10 12 +") == 22
+def test_sub():
+    assert run_errcode_test("33 3 -") == 30
+def test_mul():
+    assert run_errcode_test("11 3 *") == 33
