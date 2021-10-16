@@ -70,6 +70,10 @@ def test_emit():
     assert run_stdout_test(f"49 48 emit emit") == "01"
 def test_do():
     assert run_errcode_test(f": main [ 10 [ drop 1 ] do exit ]") == 1
+def test_invalid_src():
+    with pytest.raises(Exception) as e_info:
+        run_errcode_test(f": main [  [  ]   ")
+    assert "end-of-code-block expected" in str(e_info)
 @pytest.mark.parametrize("num",[0, 10, 255, 256, 65534])
 def test_emitxx(num):
     expect = num & 0xFF

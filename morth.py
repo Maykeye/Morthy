@@ -118,7 +118,7 @@ class Context:
         return definition
 
     def check_token_name(self, token:str):
-        if not self.check_token_names:
+        if not self.check_token_names or token == "":
             return
         if token[0] in Context.STR_LITERAL:
             return
