@@ -24,8 +24,10 @@
 
 :$ -rot (abc -- cab) [
     0 2 :v (c b a)
-    0 1 :v (c a b)
+    swap (c a b)
 ]
+(  rot:..abc-bca -rot:..abc-cab )
+
 
 :$ ?dup (w -- 0 | w w) [
     dup [ dup ] iff
@@ -33,9 +35,9 @@
 
 :$ roll (x0 x1 .. xn n -- x1 x2 .. xn x0) [
  ( e.g. consider :swap 1 roll )
- 1 + 0 :+ ( x0 x1 .. xn n+1 n+1: a b 2 2)
+ 1+ 0 :+ ( x0 x1 .. xn n+1 n+1: a b 2 2)
  :+       ( x0 x1 .. xn n+1 n+1: a b 2 a)
- 0 1 :v   ( x0 x1 .. xn n+1 n+1: a b a 2)
+ swap   ( x0 x1 .. xn n+1 n+1: a b a 2)
  :-       ( b a )
 ]
 :$ 2drop [ drop drop ]
@@ -102,15 +104,31 @@
 :$ emitX64 [ emitXXXXXXXXXXXXXXXX ]
 
 : dump-stack-n ( n -- ) [
-    stack-pointer prev-stack-cell
-    dup emitX64 ": " 2 type
-    swap dup  (.. &n n n) [
-        swap
-            dup @ emitX64 ' ' emit prev-stack-cell
-        swap
-        1- dup repnz
-        ".." 2 type
-    ] iff
+
+    ( first we need to rewind stack )
+
+    stack-pointer over 1+
+    [
+        1- swap
+        prev-stack-cell swap
+        dup repnz
+    ] do drop
+    next-stack-cell
+
+    ( print head )
+    dup emitX64 ':' emit ' ' emit swap
+
+    ( now go towards the top of the stack)
+    [
+        1- swap
+        dup @ emitX64 ' ' emit
+        next-stack-cell swap
+        dup repnz
+    ] do drop
+    "--TOP\n" 6 type
+
+
+
 ]
 
 ( vim: set filetype=forth : )

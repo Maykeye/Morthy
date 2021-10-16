@@ -147,6 +147,11 @@
     <-r8
 ]
 
+:$ ! (val addr -- ) [ ->r8 ->r9
+    :.text "mov [r8], r9"
+]
+
+
 :$ c@ [ ->r8
     :.text "mov r8b, [r8]"
     :.text "and r8, 255"
@@ -268,6 +273,7 @@
     :e "    jmp r8"
 ]
 
-:$ prev-stack-cell [ 8 + ]
+:$ prev-stack-cell [ :.text "add qword [rsp], 8" ]
+:$ next-stack-cell [ :.text "sub qword [rsp], 8" ]
 
 ( vim: set filetype=forth : )

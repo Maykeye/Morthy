@@ -111,5 +111,5 @@ def test_dump_stack_n():
     assert stdout.find(':') == 16
     assert stdout.rfind(':') == 16
     assert stdout[17:18] == ' '
-    assert stdout[18:] == "000000000000001E 0000000000000014 000000000000000A .."
+    assert stdout[18:] == "000000000000000A 0000000000000014 000000000000001E --TOP\n"
     assert all(x in "0123456789ABCDEF" for x in stdout[:16])
