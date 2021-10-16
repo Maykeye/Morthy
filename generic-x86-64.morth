@@ -142,6 +142,11 @@
     :.text "mov [r9], r8b"
 ]
 
+:$ @ [ ->r8
+    :.text "mov r8, [r8]"
+    <-r8
+]
+
 :$ c@ [ ->r8
     :.text "mov r8b, [r8]"
     :.text "and r8, 255"
@@ -237,6 +242,10 @@
     :.text "test rax, rax"
     :.text `jnz {NAME}_start`
 ]
+:$ stack-pointer [
+    :.text "mov rax, rsp"
+    :.text "push rax"
+]
 
 :$ hlt [ :.text "hlt" ]
 
@@ -258,5 +267,7 @@
     :e "    pop rax"
     :e "    jmp r8"
 ]
+
+:$ prev-stack-cell [ 8 + ]
 
 ( vim: set filetype=forth : )

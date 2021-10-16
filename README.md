@@ -24,6 +24,10 @@
     if it is, continues as normal.
     Otherwise implementation-defined crash happens
 
+* `stack-pointer` ( -- sp ) <br>
+    Pushes the address of top of stack before the push itself. I.e.
+    If we have `..x y z` on stack with `z` on top, then `stack-pointer` will push the address of `z`.
+
 * `dump-stack-n` ( n -- ) <br>
     Pops n, then print N element on top of the stack (excluding N at this point)
     in implementation-defined way

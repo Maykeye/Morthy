@@ -101,6 +101,16 @@
 :$ emitX32 [ emitXXXXXXXX ]
 :$ emitX64 [ emitXXXXXXXXXXXXXXXX ]
 
-
+: dump-stack-n ( n -- ) [
+    stack-pointer prev-stack-cell
+    dup emitX64 ": " 2 type
+    swap dup  (.. &n n n) [
+        swap
+            dup @ emitX64 ' ' emit prev-stack-cell
+        swap
+        1- dup repnz
+        ".." 2 type
+    ] iff
+]
 
 ( vim: set filetype=forth : )
