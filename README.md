@@ -1,9 +1,13 @@
 # Verbs:
 
 ## Stack operations
-
 * `xchg` (xb.. xa.. x2 x1 x0 a b -- xa.. xb.. x2 x1 x0)
     Swaps arbitrary cells
+
+## Control flow
+
+* `do`  (code -- XXX)
+ Executes code block on the stack (main use case is to start loops do-loops)
 
 ## Debug
 * `sentinel!` ( -- S)
@@ -33,7 +37,6 @@ All of them have the form of (a b -- ?)
     Signed comparison
 
 ## Binary operations
-
 * `shr` (a n -- a>>n)
 
     Pops two values (`n` then `a`), shifts `a` right by `n` bits,

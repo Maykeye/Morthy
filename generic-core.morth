@@ -8,7 +8,7 @@
 
 :$ tuck (AB-BAB) [ 0 :+ 2 :v ]
 :$ swap (AB-BA) [ 0 1 :v ]
-
+:$ do [ 1 swap iff ]
 :$ xchg (xb.. xa.. x2 x1 x0 a b -- xa.. xb.. x2 x1 x0 | swaps arbitrary cells) [
     :v
 ]

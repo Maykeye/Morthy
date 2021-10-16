@@ -66,16 +66,14 @@ def test_xchg0():
 ])
 def test_xchg(s, res):
     assert run_errcode_test(f": main [ {s} xchg exit ] ") == res
-
-
 def test_emit():
     assert run_stdout_test(f"49 48 emit emit") == "01"
-
+def test_do():
+    assert run_errcode_test(f": main [ 10 [ drop 1 ] do exit ]") == 1
 @pytest.mark.parametrize("num",[0, 10, 255, 256, 65534])
 def test_emitxx(num):
     expect = num & 0xFF
     assert run_stdout_test(f"{num} emitXX") == f"{expect:02X}"
-
 @pytest.mark.parametrize("num",[0, 10, 255, 256, 65534, 0x1234, 0xF1234, 2**64-1, 2**64-10])
 def test_emitxxxx(num):
     expect = num & 0xFFFF
@@ -85,8 +83,6 @@ def test_emitxxxx(num):
 def test_emitxxxxxxxx(num):
     expect = num & 0xFFFFFFFF
     assert run_stdout_test(f"{num} emitXXXXXXXX") == f"{expect:08X}"
-
-
 def test_incr():
     assert run_stdout_test(f"11 1+ emitXX") == f"0C"
 def test_indecr():
