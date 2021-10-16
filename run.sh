@@ -6,4 +6,5 @@ nasm -felf64 out/${BASE}.asm
 ld out/${BASE}.o -oout/${BASE}
 set +e
 ./out/${BASE}
-echo $?
+echo -e "\n---RESULT:$?"
+

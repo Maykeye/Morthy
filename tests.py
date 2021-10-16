@@ -90,3 +90,5 @@ def test_x64():
     assert run_stdout_test(f"1162849439785405935 emitX64") == f"1023456789ABCDEF"
 def test_x64_2():
     assert run_stdout_test(f"17870283323409323519 emitX64") == f"F8000000776655FF"
+def test_x64_3():
+    assert run_stdout_test("256 emitX64") == f"0000000000000100"

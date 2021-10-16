@@ -42,3 +42,9 @@
 
 
 
+:$ syscall1-r (arg1 syscallN -- res) [
+    ->rax ->rdi
+    syscall <-rax
+]
+
+:$ syscall-brk [ 12 syscall1-r ]

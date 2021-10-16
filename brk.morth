@@ -1,0 +1,20 @@
+( : run [
+    0
+    12
+    ->rax
+    ->rdi
+    syscall
+    <-rax
+] )
+
+
+: main [
+    0 syscall-brk       dup emitX64 cr
+    8 + syscall-brk     dup emitX64 cr
+    8 - c@              ( reading from allocated memory )
+
+
+
+( 0x 41 30 00 )
+    exit
+]
