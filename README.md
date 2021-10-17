@@ -70,6 +70,9 @@ All of them have the form of (a b -- ?)
 * `emit` (b -- ) <br>
     Emit a single character
 
+* `cr` ( -- )
+    Emit a new line
+
 * `type` (buf len -- ) <br>
     Emits characters from the buffer.
 

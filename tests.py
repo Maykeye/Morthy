@@ -122,3 +122,6 @@ def test_dump_stack_x2():
 @pytest.mark.parametrize("num",[0, 10, 255, 256, 65534, 0x1234, 0xF1234, 0x12345678,0x80706050,2**32-1, 2**32,2**40,2**64-1, 2**64-10])
 def test_n_to_strlen(num):
     assert run_stdout_test(f"{num} n>s$ type")
+
+def test_cr():
+    assert run_stdout_test(f"cr") == "\n"
