@@ -56,10 +56,22 @@ All of them have the form of (a b -- ?)
     Pops two values (`n` then `a`), shifts `a` right by `n` bits,
     leaving last bit zero. Then the result is pushed to the stack.
 
-## I/O
+## I/O and conversion
 * `hex-digit` (n -- ch) <br>
     Takes last 4 bits of the number and converts them
     to human-readable character represention
+
+* `n>s$` (n -- buf len) <br>
+    Using the same buffer for each call, converts number to
+    string in base 10.
+    Returns string buffer and length of the string.
+    Return form is suitable for `type`ing.
+
+* `emit` (b -- ) <br>
+    Emit a single character
+
+* `type` (buf len -- ) <br>
+    Emits characters from the buffer.
 
 * `emitXX`, `emitX8` (n -- ) <br>
     Pops a value and prints its least-significant byte in human-readable form. Byte is always printed using two characters, i.e. leading zero are not truncated.

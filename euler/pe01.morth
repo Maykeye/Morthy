@@ -1,0 +1,15 @@
+:varc instr-buf 32
+
+
+
+( converts unsigned integer to string stored in a static buffer, returns
+address of the buffer and the length. All leading zeroes are trimmed )
+
+(  rot:..abc-bca -rot:..abc-cab )
+
+
+: main [
+        128 uintstr
+    type
+    123 exit
+]
