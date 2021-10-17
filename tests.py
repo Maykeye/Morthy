@@ -113,3 +113,9 @@ def test_dump_stack_n():
     assert stdout[17:18] == ' '
     assert stdout[18:] == "000000000000000A 0000000000000014 000000000000001E --TOP\n"
     assert all(x in "0123456789ABCDEF" for x in stdout[:16])
+def test_dump_stack_x2():
+    stdout = run_stdout_test("5 10 2 dump-stack-n 2 dump-stack-n").strip()
+    lines = stdout.split('\n')
+    assert len(lines) == 2
+    assert lines[0] == lines[1], "stack dumping should not change anything in the stack"
+

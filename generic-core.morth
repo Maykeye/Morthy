@@ -126,9 +126,7 @@
         dup repnz
     ] do drop
     "--TOP\n" 6 type
-
-
-
+    drop
 ]
 
 ( vim: set filetype=forth : )
