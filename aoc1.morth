@@ -1,28 +1,43 @@
 :varc buffer 16384
+:varc numbers 16384
 
-:varc numbers 1024
+: skip-ws ( caddr -- caddr ) [ 
+    [
+        dup c@ is-white-space? [ leave ] ifz
+        1+
+    ] do
+] 
 
-: is-digit? ( c -- ? ) [
-    dup 58 <                ( c f1 )
-    swap
-    48 >=                   ( f1 f2 )
-    and
+: parse-ints ( ... caddr waddr -- #w ) [
+    ( read integers from text buffer at caddr and stores them into wbuffer. 
+      returns number of read words) 
+    0 rot ( w #w c )
+
+    [ 
+        parse-int ( w #w c n ? ) [ 2drop nip leave ] ifz ( w #w c n )
+        3 pick ! ( w #w c' )
+        rot cell+  rot 1+  rot skip-ws ( w' #w' c' )
+        rep 
+    ] do
 ]
 
-: read-int ( caddr -- addr2 n ) [
-    ( parse decimal integer and put it on stack, first address of non-digit is also placed on stack )
-    
-    
-    dup c@
 
-    is-digit?
-
-
+: day1-part-1 ( n -- m ) [
+    0 1  ( n sum index )   
+    [
+        2 pick over = [ drop nip  leave ] iff        
+        numbers over nth dup ( wa wa )
+        @ swap cell- @ >= ( cur>last )
+        ( n sum index <=> )
+        rot + ( n index sum' )
+        swap 1+  ( n sum' index' )        
+        rep        
+    ] do
 ]
 
 : main [
-    '9'  buffer c!
-    buffer read-int 
-    
-    exit 
+    buffer 16384 STDIN_FILENO read-buffer
+    buffer numbers parse-ints ( n )
+    day1-part-1 print-int
+    0 exit 
 ]
