@@ -1,6 +1,5 @@
 :i "generic-x86-64.morth"
 
-
 :$ type ( ptr len -- ) [
     1 ( stdout )
     1 ( write ) ->rax ( syscall )
@@ -20,12 +19,34 @@
 
 ]
 
+:$ key ( -- char-from-stdin-u64 ) [
+    0 read-char
+]
+
+:$ read-char ( fd -- char-from-fd ) [
+    ->rdi
+    0
+    0->rax
+    rsp->rsi
+    :.text "mov rdx, 1"
+    syscall
+]
+:$ STDIN_FILENO [ 0 ]
+:$ read-buffer ( addr n fd -- n ) [
+    ->rdi ->rdx ->rsi 0->rax
+        syscall 
+    <-rax
+]
+
+
 :$ :prologue [
     :.text "BITS 64"
     :.text "SECTION .text"
     :.text "GLOBAL _start"
     :.text "_start:"
     :.text "mov qword [_callstack], _start_hlt"
+    :.text "mov qword [_locals_ptr], _locals"
+    :.text "mov qword [_locals_ptr+8], _locals"
     :.text `call {LIT}`
     :.text "_start_hlt:"
     :.text "hlt"
@@ -34,10 +55,13 @@
     :.data ""
     :.data "SECTION .data"
     :.data "_callstack_top_ptr: dq _callstack"
+    :.data "_locals_top_ptr: dq _locals_ptr "
 
     :.bss ""
     :.bss "SECTION .bss"
     :.bss "_callstack: resq 8192"
+    :.bss "_locals:    resq 16384"
+    :.bss "_locals_ptr: resq 8192"
 ]
 
 

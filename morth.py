@@ -8,6 +8,7 @@ class Definition:
         self.name = name
         self.value = value
         self.location = location
+        self.orig_name = ""
         self.compiled = False
         self.parent = None
         self.depth = 0
@@ -129,7 +130,6 @@ class Context:
         elif token.endswith("]"):
             self.warning(f"Suspicious token name {token}, did you mean {token[:-1]} ] ?")
 
-
     def parse_code_block(self, force_expand=None):
         start_pos = self.pos
         self.skip_ws_comments()
@@ -138,8 +138,8 @@ class Context:
         self.skip_ws_comments()
         if self.pos == body_start:
             self.error("[-start-of-code-block expected, suspicious token found")
-        body = []
 
+        body = []
         while not self.eof():
             self.skip_ws_comments()
             if self.peek() == "]" and self.peek(1) in Context.TOKEN_SEP:
@@ -151,15 +151,12 @@ class Context:
             else:
                 token = self.read_token(f" for code block from {start_pos}")
                 self.check_token_name(token)
-
-
                 if token == force_expand and token in self.macro:
                     for child_token in self.macro[token]:
                         body.append(child_token)
                 else:
                     body.append(token)
         self.must_consume("]", "]-end-of-code-block expected")
-
         return body
 
     def warning(self, warn):
@@ -226,13 +223,11 @@ class Context:
 
         child = Context(self)
         child.parse_file(path)
-
         return True
 
     def substr(self, posfrom:Location, posto:Location):
         return self.text[posfrom.offset:posto.offset]
-
-
+    
     def skip_while(self, func):
         start = self.pos
         while not self.eof():
@@ -298,6 +293,7 @@ class Context:
         self.pos = Location("(compilation)",0,0,0)
         for funcdef in self.code.values():
             self.last_label_num+=1
+            funcdef.orig_name = funcdef.name
             funcdef.name = self.make_label("F")
         for vardef in self.vars.values():
             self.last_label_num+=1
@@ -321,16 +317,15 @@ class Context:
             self.current_func = func
             func.compiled = True
             self.last_name = func.name
-            self.do_compile_macro(":code-block-prologue")
+            codeblock_type = "function" if func.orig_name in self.code else "code-block"
+            self.do_compile_macro(f":{codeblock_type}-prologue")
             for token in func.value:
                 self.do_compile_token(token)
-            self.do_compile_macro(":code-block-epilogue")
-
+            self.do_compile_macro(f":{codeblock_type}-epilogue")
 
     def do_compile_token(self, token):
         if self.emit_channel is not None and (type(token) != str or token[0] not in Context.STR_LITERAL):
             self.error(":e-EMIT directive found, but it's not followed by a string literal")
-
         if type(token) == str:
             token : str = token
             if token[0:1] in Context.STR_LITERAL:
@@ -357,7 +352,6 @@ class Context:
                 self.do_compile_variable(var)
                 self.last_lit = var.name
                 return self.do_compile_macro(":variable-ref")
-
             self.error(f"unknown word: {token}")
         elif type(token) == list:
             self.last_label_num += 1
@@ -453,7 +447,6 @@ class Context:
                     if ':' not in s:
                         s = "    " + s
                     print(s, file=f)
-
 
 def init_context():
     for src, dst in [

@@ -50,6 +50,9 @@
 :$ |->r8  [ :.text "mov r8, [rsp]" ]
 :$ <-|r8  [ :.text "mov [rsp], r8" ]
 :$ 0->rdx [ :.text "xor rdx, rdx" ]
+:$ 0->rax [ :.text "xor rax, rax" ]
+:$ 0->rdi [ :.text "xor rdi, rdi" ]
+:$ rsp->rsi [ :.text "mov rsi, rsp" ]
 
 :$ :asm-test-rbx  [ :e "test rbx, rbx"]
 
@@ -152,7 +155,7 @@
 ]
 
 
-:$ c@ [ ->r8
+:$ c@ ( addr -- byte[addr] )  [ ->r8
     :.text "mov r8b, [r8]"
     :.text "and r8, 255"
     <-r8
@@ -219,16 +222,46 @@
 :$ :global-variable-decl-cell [
     :.bss `{NAME}: resq {LIT}`
 ]
-:$ :code-block-prologue [
+
+:$ :common-prologue [
     :.text `{NAME}:`
     :.text `mov r8, [_callstack_top_ptr]`
     :.text `add r8, 8`
     :.text `pop r9`
     :.text `mov [r8], r9`
     :.text `mov [_callstack_top_ptr], r8`
-    :.text `{NAME}_start:`
-
 ]
+
+
+:$ :code-block-prologue [
+    :common-prologue
+    :.text `{NAME}_start:`
+]
+
+:$ :function-prologue [
+    :common-prologue
+    :.text `mov r8, [_locals_top_ptr]`  ( get pointer to current locals )
+    :.text `add r8, 8`                  ( move it to the next slice  )
+    :.text `mov r9, [r8]`               ( which should point to the first unused byte  )
+    :.text `mov [r8 + 8], r9`             ( mark end of the slice. It's empty, so it points to the beginning )
+    :.text `mov [_locals_top_ptr], r8`  ( move locals pointer to the next slice )
+    :.text `{NAME}_start:`
+]
+
+:$ :free-locals [
+    :.text `mov r8, [_locals_top_ptr]`  ( get pointer to current locals )
+    :.text `sub r8, 8`                  ( move it to the previous slice  )
+    :.text `mov [_locals_top_ptr], r8`  ( update pointer to the beginning of the previous slice )
+]
+
+:$ set-local-vars-csize  ( n -- set locals size  ) [
+    :.text `mov r8, [_locals_top_ptr]`  ( get pointer to current local slice border )
+    :.text `mov r9, [r8]`               ( get start of local slice )
+    :.text `add r9, [rsp]`              ( shift slice by n )
+    :.text `mov [r8 + 8], r9`           ( write end of slice )
+    drop
+]
+
 :$ :code-block-epilogue [
     :.text `{NAME}_end:`
     :.text `mov r8, [_callstack_top_ptr]`
@@ -236,13 +269,22 @@
     :.text `jmp [r8]`
 ]
 
+:$ :function-epilogue [
+    :.text `{NAME}_end:`
+    :free-locals
+    :.text `mov r8, [_callstack_top_ptr]`
+    :.text `sub qword [_callstack_top_ptr], 8`
+    :.text `jmp [r8]`
+]
+
 :$ leave [
+    :free-locals
     :.text `sub qword [_callstack_top_ptr], 8*({BLOCK_DEPTH}+1)`
     :.text `mov r8, [_callstack_top_ptr]`
     :.text `jmp [r8+8]`
 ]
 
-:$ repnz [
+:$ repnz ( 0? -- starts to the beginning of the [block] if flag is not-zero ) [
     ->rax
     :.text "test rax, rax"
     :.text `jnz {NAME}_start`

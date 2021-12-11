@@ -151,4 +151,9 @@
     dup
     .n>s$-buf 32 + swap -
 ]
+
+:$ print-int ( n -- ) [
+    n>s$ type
+]
+
 ( vim: set filetype=forth : )
