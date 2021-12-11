@@ -1,0 +1,37 @@
+: f2 ( -- 10 20 10 20 ) [
+    16 set-locals-csize 
+    10 0 local-w !
+    20 1 local-w !
+    
+    0 local-w @
+    1 local-w @
+    0 local-w @
+    1 local-w @
+    
+
+]
+
+: f3 [
+    16 set-locals-csize 
+    100 0 local-w !
+    255 1 local-w !
+    0 [ leave ] ifz
+]
+
+: f1 ( --   )
+[
+    8 set-locals-csize ( 10 20 10 20 64 10 20 10 20 64 )
+    64 0 local-w !
+    f2 
+    0 local-w @
+    f2
+    f3 
+    0 local-w @
+]
+
+: main [
+    16 set-locals-csize
+    f1
+    10 dump-stack-n
+    0 exit
+]   

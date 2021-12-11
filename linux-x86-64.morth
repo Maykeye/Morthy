@@ -55,7 +55,7 @@
     :.data ""
     :.data "SECTION .data"
     :.data "_callstack_top_ptr: dq _callstack"
-    :.data "_locals_top_ptr: dq _locals_ptr "
+    :.data "_current_frame_ptr: dq _locals_ptr "
 
     :.bss ""
     :.bss "SECTION .bss"

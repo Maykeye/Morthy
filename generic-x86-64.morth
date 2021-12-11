@@ -96,7 +96,8 @@
     :.text `call rax`
     :.text `{CL!}:`
 ]
-:$ ifz [
+
+:$ ifz ( 0? block -- run block if condition is zero ) [
     ->rax ->rbx :asm-test-rbx
     :.text `jnz {CL+}`
     :.text `call rax`
@@ -161,7 +162,7 @@
     <-r8
 ]
 
-:$ < (a b -- $signed(a<b) ) [ ->r8 ->r9 0->rdx
+:$ < (... a b -- $signed(a<b) ) [ ->r8 ->r9 0->rdx
     :.text "cmp r9, r8"
     :.text "setl dl"
     <-rdx
@@ -172,7 +173,11 @@
     :.text "setg dl"
     <-rdx
 ]
-
+:$ >= (a b -- $signed(a<b) ) [ ->r8 ->r9 0->rdx
+    :.text "cmp r9, r8"
+    :.text "setge dl"
+    <-rdx
+]
 
 :$ = [ ->r8 ->r9 0->rdx
     :.text "cmp r8, r9"
@@ -240,26 +245,37 @@
 
 :$ :function-prologue [
     :common-prologue
-    :.text `mov r8, [_locals_top_ptr]`  ( get pointer to current locals )
+    :.text `mov r8, [_current_frame_ptr]`  ( get pointer to current locals )
     :.text `add r8, 8`                  ( move it to the next slice  )
     :.text `mov r9, [r8]`               ( which should point to the first unused byte  )
     :.text `mov [r8 + 8], r9`             ( mark end of the slice. It's empty, so it points to the beginning )
-    :.text `mov [_locals_top_ptr], r8`  ( move locals pointer to the next slice )
+    :.text `mov [_current_frame_ptr], r8`  ( move locals pointer to the next slice )
     :.text `{NAME}_start:`
 ]
 
 :$ :free-locals [
-    :.text `mov r8, [_locals_top_ptr]`  ( get pointer to current locals )
+    :.text `mov r8, [_current_frame_ptr]`  ( get pointer to current locals )
     :.text `sub r8, 8`                  ( move it to the previous slice  )
-    :.text `mov [_locals_top_ptr], r8`  ( update pointer to the beginning of the previous slice )
+    :.text `mov [_current_frame_ptr], r8`  ( update pointer to the beginning of the previous slice )
 ]
 
-:$ set-local-vars-csize  ( n -- set locals size  ) [
-    :.text `mov r8, [_locals_top_ptr]`  ( get pointer to current local slice border )
+:$ set-locals-csize  ( n -- set locals size  ) [
+    :.text `mov r8, [_current_frame_ptr]`  ( get pointer to current local slice border )
     :.text `mov r9, [r8]`               ( get start of local slice )
     :.text `add r9, [rsp]`              ( shift slice by n )
     :.text `mov [r8 + 8], r9`           ( write end of slice )
     drop
+]
+
+
+:$ local-w ( n -- addr ) [ 
+    ( gets the address of local word# n )
+    :.text `mov r8, [_current_frame_ptr]`   ( get pointer to current local slice border pointer )
+    :.text `mov r8, [r8]`                   ( load current slice )
+    :.text `mov r9, [rsp]`
+    :.text `shl r9, 3`                      ( multiply word index by 8 to get offset in bytes )
+    :.text `add r8, r9`                     ( apply offset to beginning of the slice )
+    :.text `mov [rsp], r8`                  ( reply top of stack with real address )    
 ]
 
 :$ :code-block-epilogue [

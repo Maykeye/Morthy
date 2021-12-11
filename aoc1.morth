@@ -1,0 +1,28 @@
+:varc buffer 16384
+
+:varc numbers 1024
+
+: is-digit? ( c -- ? ) [
+    dup 58 <                ( c f1 )
+    swap
+    48 >=                   ( f1 f2 )
+    and
+]
+
+: read-int ( caddr -- addr2 n ) [
+    ( parse decimal integer and put it on stack, first address of non-digit is also placed on stack )
+    
+    
+    dup c@
+
+    is-digit?
+
+
+]
+
+: main [
+    '9'  buffer c!
+    buffer read-int 
+    
+    exit 
+]
