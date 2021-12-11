@@ -1,0 +1,34 @@
+: is-white-space? ( c - ? ) [
+    dup ' ' = [ drop 1 leave ] iff
+    dup '\t' = [ drop 1 leave ] iff
+    dup '\n' = [ drop 1 leave ] iff
+        '\r' = [ drop 1 leave ] iff
+    0
+]
+
+: is-digit? ( c -- ? ) [
+    dup 58 <                ( c f1 )
+    swap
+    48 >=                   ( f1 f2 )
+    and
+]
+
+
+: parse-int ( caddr -- addr2 n ? ) [
+    ( parse decimal integer and put it on stack, 
+     first address of non-digit is also placed on stack 
+     returned flag is not zero number was read and 0 otherwise 
+    )
+    0 swap ( n cadddr )
+    dup c@ is-digit? [ swap 0 leave ] ifz
+    [
+        ( pre-condition: current character is digit )
+        dup c@ digit->number ( n caddr int-digit )
+        rot 10 * ( caddr int-digit 10n  )
+        + swap ( 10n+digit caddr )
+        1+ dup c@  ( n' caddr+1 caddr[1] )
+        is-digit? repnz
+    ] do
+    swap
+    1
+]

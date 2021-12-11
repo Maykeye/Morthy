@@ -129,13 +129,17 @@
     drop
 ]
 
+:$ space ( -- | print space to STDOUT ) [
+    ' ' emit
+]
+
 
 (convert integer number to string+len using the same
  buffer for each call)
 :varc .n>s$-buf 32
 : n>s$ (n -- s len) [
 
-    dup [ "0" 1 leave ] ifz
+    dup [ drop "0" 1 leave ] ifz
 
     .n>s$-buf 32 + swap
     [   (buf n -- )

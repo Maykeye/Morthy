@@ -24,7 +24,6 @@ class Location:
     def __eq__(self, other):
         return self.offset == other.offset
 
-
 class Context:
     WSPACE=' \t\n\r'
     TOKEN_SEP = WSPACE+'('
@@ -52,14 +51,12 @@ class Context:
         self.parse()
 
     def parse(self):
-
         while True:
             self.skip_ws_comments()
             if self.eof():
                 break
             if self.try_parse_system_directive():
                 continue
-
             self.error("unexpected token")
 
     def try_parse_system_directive(self):
@@ -87,8 +84,6 @@ class Context:
             self.error("token size must be integer")
         self.vars[var_name] = self.make_unique(var_name, (token, is_char), bak)
         return True
-
-
 
     def parse_macro(self):
         self.goto_next_char()
@@ -386,9 +381,10 @@ class Context:
             if len(lower) == 4 and lower.startswith("\\x")\
             and all(x in "0123456789abcdef" for x in lower[2:]):
                 return self.do_compile_int_lit(int(lower[2:],16))
-
-            if len(string) != 1 and not is_hex_char:
-                self.error("char literal must be 1 char long")
+            if lower in ("\\t", "\\r", "\\n"):
+                return self.do_compile_int_lit(ord(bytes(lower,"utf-8").decode("unicode_escape")))
+            if len(string) != 1:
+                self.error(f"char literal must be 1 char long, instead got [{string}]")
             return self.do_compile_int_lit(ord(string))
 
         if string_type == "`":
@@ -398,13 +394,14 @@ class Context:
                     assert prohibited not in string
             string = string.replace("{LIT}", self.last_lit)
             string = string.replace("{NAME}", self.last_name)
+            string = string.replace("{ORIG_NAME}", self.current_func.orig_name)
             string = string.replace("{BLOCK_DEPTH}", str(self.current_func.depth))
             string = string.replace("{CL+}", self.make_label("L", 1))
             string = string.replace("{CL-}", self.make_label("L", -1))
             string = string.replace("{CL!}", self.make_label("L"))
         data = string.encode("utf-8")
         if self.emit_channel is None:
-            self.bstrlen = len(data)
+            self.bstrlen = len(data.decode('unicode_escape'))
         if self.emit_channel is not None:
             self.channels[self.emit_channel].append(data)
             self.emit_channel = None
@@ -425,7 +422,6 @@ class Context:
         for token in macro.value:
             self.do_compile_token(token)
         macro.compiled = False
-
 
     def do_compile_int_lit(self, i):
         self.last_lit = str(i)
@@ -450,9 +446,9 @@ class Context:
 
 def init_context():
     for src, dst in [
-        ('\\', '\\\\'), ('0', '\\\0'), ('\'', '\\\''),
+        ('\\', '\\\\'), ('0', '\\0'), ('\'', '\\\''),
         ('`', '`'),
-        ('\"', '\\"'), ('t', '\\\t'), ('n', '\\n'),
+        ('\"', '\\"'), ('t', '\\t'), ('n', '\\n'),
         ('r', '\\r')
     ]:
         Context.STR_REPLACEMENT[src]=dst
@@ -489,6 +485,6 @@ def run(input_filename="fizzbuzz.morth", output="nasm"):
 init_context()
 
 if __name__ == "__main__":
-    filename = "fizzbuzz.morth" if len(sys.argv) <=1 else sys.argv[1]
+    filename = "helloworld.morth" if len(sys.argv) <=1 else sys.argv[1]
     mode = "nasm-ld" if len(sys.argv) <=2 else sys.argv[2]
     run(filename, mode)

@@ -4,6 +4,8 @@
     channel 2 -- bss
 )
 
+:$ digit->number [ '0' - ]
+
 :$ :.text [ :e  ]
 :$ :.rodata [ :e1  ]
 :$ :.data [ :e2  ]
@@ -20,6 +22,10 @@
     :.text "push r9"
 ]
 
+:$ or [
+    ->r8
+    :.text "or qword [rsp], r8"
+]
 :$ and [
     ->r8
     :.text "and qword [rsp], r8"
@@ -27,6 +33,10 @@
 :$ shr ( a n -- a>>n ) [
     ->rcx
     :.text "shr qword [rsp], cl"
+]
+:$ shl ( a n -- a<<n ) [
+    ->rcx
+    :.text "shl qword [rsp], cl"
 ]
 
 :$ negate [ :.text "neg qword [rsp]" ]
@@ -136,8 +146,15 @@
     :.text "syscall"
 ]
 
-:$ nip [ ->r8 ->r9 <-r8 ]
-:$ over [
+:$ cell+ ( x -- x+8 ) [
+    :.text "add qword [rsp], 8"
+] 
+:$ cell- ( x -- x-8 ) [
+    :.text "sub qword [rsp], 8"
+] 
+
+:$ nip ( ..ab - b ) [ ->r8 ->r9 <-r8 ]
+:$ over ( ..ab - aba ) [
     :.text "mov r8, [rsp+8]"
     <-r8
 ]
@@ -160,6 +177,10 @@
     :.text "mov r8b, [r8]"
     :.text "and r8, 255"
     <-r8
+]
+
+:$ nth ( waddr n -- &waddr[n] )  [
+    3 shl +
 ]
 
 :$ < (... a b -- $signed(a<b) ) [ ->r8 ->r9 0->rdx
@@ -195,7 +216,7 @@
     :.text "bts rdx, 63"
     :.text "add rdx, rsp"
 ]
-
+:$ breakpoint [ :.text "int3" ]
 :$ sentinel! [ :sentinel->rdx <-rdx ]
 :$ sentinel@ [
     ->r8
@@ -229,7 +250,7 @@
 ]
 
 :$ :common-prologue [
-    :.text `{NAME}:`
+    :.text `{NAME}:  ; {ORIG_NAME} `
     :.text `mov r8, [_callstack_top_ptr]`
     :.text `add r8, 8`
     :.text `pop r9`
@@ -250,7 +271,7 @@
     :.text `mov r9, [r8]`               ( which should point to the first unused byte  )
     :.text `mov [r8 + 8], r9`             ( mark end of the slice. It's empty, so it points to the beginning )
     :.text `mov [_current_frame_ptr], r8`  ( move locals pointer to the next slice )
-    :.text `{NAME}_start:`
+    :.text `{NAME}_start: `
 ]
 
 :$ :free-locals [
@@ -299,8 +320,10 @@
     :.text `mov r8, [_callstack_top_ptr]`
     :.text `jmp [r8+8]`
 ]
-
-:$ repnz ( 0? -- starts to the beginning of the [block] if flag is not-zero ) [
+:$ rep ( -- | jmp to beginning of the current [block] unconditionally ) [ 
+    :.text `jmp {NAME}_start`
+]
+:$ repnz ( 0? -- | starts to the beginning of the [block] if flag is nz ) [
     ->rax
     :.text "test rax, rax"
     :.text `jnz {NAME}_start`

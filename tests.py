@@ -1,6 +1,11 @@
 import morth
 import pytest
 
+XXX=2**64-1
+YYY=2**32-1
+LR10=list(range(10))
+LR32=list(range(32))
+
 def run_errcode_test(src, raw=None):
     filename = "out/_unittest.morth"
     with open(filename, "w") as f:
@@ -121,7 +126,40 @@ def test_dump_stack_x2():
 
 @pytest.mark.parametrize("num",[0, 10, 255, 256, 65534, 0x1234, 0xF1234, 0x12345678,0x80706050,2**32-1, 2**32,2**40,2**64-1, 2**64-10])
 def test_n_to_strlen(num):
-    assert run_stdout_test(f"{num} n>s$ type")
-
+    assert run_stdout_test(f"{num} n>s$ type") == str(num)
 def test_cr():
     assert run_stdout_test(f"cr") == "\n"
+
+#
+# ENCODING test
+#
+@pytest.mark.parametrize("p",[('t', '\t'), ('n', '\n'), ('r', '\r')])
+def test_char_enc_esc(p):
+    txt, val = p
+    assert run_errcode_test(f"'\\{txt}' {ord(val)} =") == 1
+@pytest.mark.parametrize("n", [0, 2, 16, 127, 128, 255])
+def test_char_enc_hex(n):
+    assert run_errcode_test(f"'\\x{n:02x}' {n} =") == 1
+
+def test_bstrlen():
+    assert run_errcode_test('"\\x10\\t\\"cd" $bstrlen') == 5
+
+
+#
+# STD-TEXT module tests
+#
+@pytest.mark.parametrize("num",LR32 + [XXX, YYY])
+def test_is_digit_0(num):
+    assert run_errcode_test(f"{num} is-digit?") == 0
+@pytest.mark.parametrize("num", LR10)
+def test_is_digit_1(num):
+    assert run_errcode_test(f"'{num}' is-digit?") != 0
+@pytest.mark.parametrize("ch", "abcd-~12345[]/\x7f")
+def test_is_wspace_0_p1(ch):
+    assert run_errcode_test(f"'{ch}' is-white-space?") == 0
+@pytest.mark.parametrize("num", [XXX, YYY, 0x120])
+def test_is_wspace_0_p2(num):
+    assert run_errcode_test(f"{num} is-white-space?") == 0
+@pytest.mark.parametrize("ch", " \n\r\t")
+def test_is_wspace_1(ch):
+    assert run_errcode_test(f"{ord(ch)} is-white-space?") == 1

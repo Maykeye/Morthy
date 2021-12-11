@@ -1,11 +1,6 @@
-: run [
-    sentinel!
-    "hello\x20world\n" $bstrlen type
-    sentinel@
-]
+
 : main [
-    run
-    0 exit
+    "\x10" $bstrlen  exit
 ]
 
 
